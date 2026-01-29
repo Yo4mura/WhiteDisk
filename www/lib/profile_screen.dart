@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'theme_manager.dart';
 import 'playlist_screen.dart';
 import 'artist_screen.dart';
 import 'player_screen.dart';
 import 'settings_screen.dart';
+import 'music_service.dart';
+import 'track_model.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -12,6 +15,18 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final MusicService _musicService = MusicService();
+  
+  /// Поиск трека по названию и артисту
+  Track? _findTrack(String title, String artist) {
+    try {
+      return _musicService.tracks.firstWhere(
+        (t) => t.title == title && t.artist == artist,
+      );
+    } catch (e) {
+      return null;
+    }
+  }
   String _selectedTab = 'Плейлисты';
   final TextEditingController _commentController = TextEditingController();
   final List<Map<String, dynamic>> _comments = [
@@ -59,7 +74,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _showCommentMenu(BuildContext context, String commentId) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1C1C1C),
+      backgroundColor: ThemeManager.instance.secondaryBackgroundColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -69,8 +84,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.delete_outline, color: Colors.red),
-              title: const Text(
+              leading: Icon(Icons.delete_outline, color: Colors.red),
+              title: Text(
                 'Удалить комментарий',
                 style: TextStyle(color: Colors.red),
               ),
@@ -80,8 +95,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.cancel, color: Color(0xFFEFEDE3)),
-              title: const Text(
+              leading: Icon(Icons.cancel, color: Color(0xFFEFEDE3)),
+              title: Text(
                 'Отмена',
                 style: TextStyle(color: Color(0xFFEFEDE3)),
               ),
@@ -103,9 +118,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Container(
             height: 180,
             width: double.infinity,
-            color: const Color(0xFF2A2A28),
+            color: ThemeManager.instance.secondaryBackgroundColor,
             child: Image.asset(
-              'assets/vinyl2.png',
+              'assets/4db574e2cee0e13f00f9351a356fc21d.jpg',
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
                 return const SizedBox();
@@ -129,16 +144,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: const Color(0xFFEFEDE3),
+                            color: ThemeManager.instance.textColor,
                             width: 3,
                           ),
                         ),
                         child: ClipOval(
                           child: Image.asset(
-                            'assets/vinyl1.png',
+                            'assets/746327ec1c669b09f965de5d195198e8.jpg',
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
-                              return Container(color: const Color(0xFF3D3C38));
+                              return Container(color: ThemeManager.instance.secondaryBackgroundColor);
                             },
                           ),
                         ),
@@ -184,14 +199,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           );
                         },
-                        icon: const Icon(Icons.settings, color: Color(0xFFEFEDE3)),
+                        icon: Icon(Icons.settings, color: Color(0xFFEFEDE3)),
                       ),
                     ],
                   ),
                 ),
                 Transform.translate(
                   offset: const Offset(0, -5),
-                  child: const Text(
+                  child: Text(
                     'I am so interesting',
                     style: TextStyle(fontSize: 14, color: Color(0xFFEFEDE3)),
                   ),
@@ -203,18 +218,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEFEDE3),
+                    color: ThemeManager.instance.textColor,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.play_arrow, size: 14, color: Colors.black),
+                      Icon(Icons.play_arrow, size: 14, color: Colors.black),
                       const SizedBox(width: 6),
                       Flexible(
                         child: Text(
                           'Reset - Plastic tree',
-                          style: const TextStyle(color: Colors.black),
+                          style: TextStyle(color: Colors.black),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -273,13 +288,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
-                _buildArtist(context, 'shibob', 'assets/vinyl3.png'),
+                _buildArtist(context, 'shibob', 'assets/8c5e2c48628416f0b7464f79596ec0df.jpg'),
                 const SizedBox(width: 12),
-                _buildArtist(context, 'Yoshimura', 'assets/vinyl4.png'),
+                _buildArtist(context, 'Yoshimura', 'assets/9a7871b01076799c9d4d95fec3d14e06.jpg'),
                 const SizedBox(width: 12),
-                _buildArtist(context, 'ALKUN', 'assets/vinyl5.png'),
+                _buildArtist(context, 'ALKUN', 'assets/b64ab0d02093bf822f74375c79e24e23.jpg'),
                 const SizedBox(width: 12),
-                _buildArtist(context, 'CUPSIZE', 'assets/vinyl1.png'),
+                _buildArtist(context, 'CUPSIZE', 'assets/b8be167d06c4a74174af808843cb9db4.jpg'),
               ],
             ),
           ),
@@ -296,7 +311,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 Text(
                   'Комментарии ${_comments.length}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFFEFEDE3),
@@ -314,20 +329,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1C1C1C),
+                      color: ThemeManager.instance.secondaryBackgroundColor,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: const Color(0xFFEFEDE3).withValues(alpha: 0.2),
+                        color: ThemeManager.instance.textColor.withValues(alpha: 0.2),
                         width: 1,
                       ),
                     ),
                     child: TextField(
                       controller: _commentController,
-                      style: const TextStyle(color: Color(0xFFEFEDE3)),
+                      style: TextStyle(color: Color(0xFFEFEDE3)),
                       decoration: InputDecoration(
                         hintText: 'Добавить комментарий...',
                         hintStyle: TextStyle(
-                          color: const Color(0xFFEFEDE3).withValues(alpha: 0.5),
+                          color: ThemeManager.instance.textColor.withValues(alpha: 0.5),
                         ),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
@@ -341,7 +356,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(width: 8),
                 IconButton(
                   onPressed: _addComment,
-                  icon: const Icon(Icons.send, color: Color(0xFFEFEDE3)),
+                  icon: Icon(Icons.send, color: Color(0xFFEFEDE3)),
                 ),
               ],
             ),
@@ -364,11 +379,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             children: const [
-              _PlaylistTile(title: 'самое круто на..', imagePath: 'assets/vinyl1.png'),
+              _PlaylistTile(title: 'самое круто на..', imagePath: 'assets/cdf42b8bf42351fdf0aed76a1efa1a4d.jpg'),
               SizedBox(width: 12),
-              _PlaylistTile(title: 'самое круто на..', imagePath: 'assets/vinyl2.png'),
+              _PlaylistTile(title: 'самое круто на..', imagePath: 'assets/dada9e612a304c6228f597fb30f58d31.jpg'),
               SizedBox(width: 12),
-              _PlaylistTile(title: 'самое круто на..', imagePath: 'assets/vinyl3.png'),
+              _PlaylistTile(title: 'самое круто на..', imagePath: 'assets/e27ce83b1f94fe83ef3cc161d1d066ae.jpg'),
             ],
           ),
         );
@@ -392,11 +407,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
             children: [
-              _buildSongItem('Reset - Plastic tree', 'shibob', 'assets/vinyl1.png'),
+              _buildSongItem('Reset - Plastic tree', 'shibob', 'assets/vinyl5.png'),
               const SizedBox(height: 12),
-              _buildSongItem('Neon Lights', 'Yoshimura', 'assets/vinyl2.png'),
+              _buildSongItem('Neon Lights', 'Yoshimura', 'assets/31fed70fb44cf684397169b327cab9d5.jpg'),
               const SizedBox(height: 12),
-              _buildSongItem('City Lights', 'ALKUN', 'assets/vinyl3.png'),
+              _buildSongItem('City Lights', 'ALKUN', 'assets/41dc8e4e6ceab592fbb46b5e3f545dac.jpg'),
             ],
           ),
         );
@@ -408,23 +423,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildSongItem(String title, String artist, String imagePath) {
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => PlayerScreen(
-              songTitle: title,
-              artist: artist,
-              coverPath: imagePath,
+        final track = _findTrack(title, artist);
+        if (track != null) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => PlayerScreen(track: track),
             ),
-          ),
-        );
+          );
+        } else if (_musicService.tracks.isNotEmpty) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => PlayerScreen(track: _musicService.tracks.first),
+            ),
+          );
+        }
       },
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color(0xFF1C1C1C),
+          color: ThemeManager.instance.secondaryBackgroundColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: const Color(0xFFEFEDE3).withValues(alpha: 0.1),
+            color: ThemeManager.instance.textColor.withValues(alpha: 0.1),
             width: 1,
           ),
         ),
@@ -435,12 +455,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Container(
                 width: 60,
                 height: 60,
-                color: const Color(0xFF3D3C38),
+                color: ThemeManager.instance.secondaryBackgroundColor,
                 child: Image.asset(
                   imagePath,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
-                    return const Icon(
+                    return Icon(
                       Icons.music_note,
                       color: Color(0xFFEFEDE3),
                       size: 30,
@@ -456,7 +476,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Color(0xFFEFEDE3),
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -468,7 +488,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Text(
                     artist,
                     style: TextStyle(
-                      color: const Color(0xFFEFEDE3).withValues(alpha: 0.6),
+                      color: ThemeManager.instance.textColor.withValues(alpha: 0.6),
                       fontSize: 14,
                     ),
                     maxLines: 1,
@@ -477,7 +497,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
             ),
-            const Icon(Icons.play_arrow, color: Color(0xFFEFEDE3)),
+            Icon(Icons.play_arrow, color: Color(0xFFEFEDE3)),
           ],
         ),
       ),
@@ -506,7 +526,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     Text(
                       comment['author'] as String,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Color(0xFFEFEDE3),
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -516,7 +536,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Text(
                       comment['text'] as String,
                       style: TextStyle(
-                        color: const Color(0xFFB8B6B0).withValues(alpha: 0.8),
+                        color: ThemeManager.instance.secondaryTextColor.withValues(alpha: 0.8),
                         fontSize: 14,
                       ),
                     ),
@@ -527,7 +547,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 onPressed: () {
                   _showCommentMenu(context, comment['id'] as String);
                 },
-                icon: const Icon(Icons.more_vert, color: Color(0xFFEFEDE3), size: 20),
+                icon: Icon(Icons.more_vert, color: Color(0xFFEFEDE3), size: 20),
               ),
             ],
           ),
@@ -559,7 +579,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             height: 60,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFFEFEDE3), width: 2),
+              border: Border.all(color: ThemeManager.instance.textColor, width: 2),
             ),
             child: ClipOval(
               child: Image.asset(
@@ -567,8 +587,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
-                    color: const Color(0xFF3D3C38),
-                    child: const Icon(
+                    color: ThemeManager.instance.secondaryBackgroundColor,
+                    child: Icon(
                       Icons.person,
                       size: 30,
                       color: Colors.white54,
@@ -583,7 +603,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             name,
             style: TextStyle(
               fontSize: 12,
-              color: const Color(0xFFEFEDE3).withValues(alpha: 0.8),
+              color: ThemeManager.instance.textColor.withValues(alpha: 0.8),
             ),
           ),
         ],
@@ -615,7 +635,7 @@ class _ProfileTab extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: selected ? const Color(0xFFEFEDE3) : const Color(0xFFB8B6B0),
+              color: selected ? ThemeManager.instance.textColor : ThemeManager.instance.secondaryTextColor,
             ),
           ),
           const SizedBox(height: 6),
@@ -623,7 +643,7 @@ class _ProfileTab extends StatelessWidget {
             width: selected ? 36 : 0,
             height: 3,
             decoration: BoxDecoration(
-              color: selected ? const Color(0xFFEFEDE3) : Colors.transparent,
+              color: selected ? ThemeManager.instance.textColor : Colors.transparent,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -664,8 +684,8 @@ class _PlaylistTile extends StatelessWidget {
             width: 140,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              color: const Color(0xFF1C1C1C),
-              border: Border.all(color: const Color(0xFFEFEDE3), width: 2),
+              color: ThemeManager.instance.secondaryBackgroundColor,
+              border: Border.all(color: ThemeManager.instance.textColor, width: 2),
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(7),
@@ -674,8 +694,8 @@ class _PlaylistTile extends StatelessWidget {
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
-                    color: const Color(0xFF3D3C38),
-                    child: const Icon(
+                    color: ThemeManager.instance.secondaryBackgroundColor,
+                    child: Icon(
                       Icons.playlist_play,
                       size: 60,
                       color: Colors.white54,
@@ -691,7 +711,7 @@ class _PlaylistTile extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,
-              color: const Color(0xFFEFEDE3).withValues(alpha: 0.8),
+              color: ThemeManager.instance.textColor.withValues(alpha: 0.8),
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -702,5 +722,4 @@ class _PlaylistTile extends StatelessWidget {
     );
   }
 }
-
 

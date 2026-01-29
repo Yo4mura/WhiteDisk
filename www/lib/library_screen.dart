@@ -1,10 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'theme_manager.dart';
 import 'songs_screen.dart';
 import 'playlist_screen.dart';
 import 'artist_screen.dart';
 import 'player_screen.dart';
 import 'create_playlist_screen.dart';
+import 'music_service.dart';
+import 'track_model.dart';
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
@@ -17,6 +20,30 @@ class _LibraryScreenState extends State<LibraryScreen> {
   String _selectedFilter = 'Все'; // Все, Плейлисты, Артисты, Песни, Альбомы
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
+  final MusicService _musicService = MusicService();
+
+  /// Воспроизведение трека по названию и артисту
+  void _playTrack(String title, String artist) {
+    final tracks = _musicService.tracks;
+    final trackIndex = tracks.indexWhere(
+      (t) => t.title == title && t.artist == artist,
+    );
+    if (trackIndex != -1) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => PlayerScreen(track: tracks[trackIndex]),
+        ),
+      );
+    } else {
+      // Если трек не найден, показываем сообщение
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Трек "$title" не найден в библиотеке'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
   // Mock data
   final List<Map<String, dynamic>> _playlists = [
@@ -24,27 +51,27 @@ class _LibraryScreenState extends State<LibraryScreen> {
       'title': 'Мой плейлист #1',
       'description': 'Лучшие треки',
       'songCount': 15,
-      'image': 'assets/vinyl1.png',
+      'image': 'assets/746327ec1c669b09f965de5d195198e8.jpg',
     },
     {
       'title': 'Мой плейлист #2',
       'description': 'Для работы',
       'songCount': 23,
-      'image': 'assets/vinyl2.png',
+      'image': 'assets/8c5e2c48628416f0b7464f79596ec0df.jpg',
     },
     {
       'title': 'Мой плейлист #3',
       'description': 'Чилл виб',
       'songCount': 18,
-      'image': 'assets/vinyl3.png',
+      'image': 'assets/9a7871b01076799c9d4d95fec3d14e06.jpg',
     },
   ];
 
   final List<Map<String, dynamic>> _artists = [
-    {'name': 'ALKUN', 'listeners': '5.4M', 'image': 'assets/vinyl1.png'},
-    {'name': 'Yoshimura', 'listeners': '3.2M', 'image': 'assets/vinyl2.png'},
-    {'name': 'CUPSIZE', 'listeners': '2.8M', 'image': 'assets/vinyl3.png'},
-    {'name': 'shibob', 'listeners': '1.9M', 'image': 'assets/vinyl4.png'},
+    {'name': 'ALKUN', 'listeners': '5.4M', 'image': 'assets/b64ab0d02093bf822f74375c79e24e23.jpg'},
+    {'name': 'Yoshimura', 'listeners': '3.2M', 'image': 'assets/b8be167d06c4a74174af808843cb9db4.jpg'},
+    {'name': 'CUPSIZE', 'listeners': '2.8M', 'image': 'assets/cdf42b8bf42351fdf0aed76a1efa1a4d.jpg'},
+    {'name': 'shibob', 'listeners': '1.9M', 'image': 'assets/dada9e612a304c6228f597fb30f58d31.jpg'},
   ];
 
   final List<Map<String, dynamic>> _albums = [
@@ -52,28 +79,28 @@ class _LibraryScreenState extends State<LibraryScreen> {
       'title': 'Midnight Sessions',
       'artist': 'ALKUN',
       'year': '2024',
-      'image': 'assets/vinyl1.png',
+      'image': 'assets/e27ce83b1f94fe83ef3cc161d1d066ae.jpg',
       'songCount': 12,
     },
     {
       'title': 'Urban Dreams',
       'artist': 'Yoshimura',
       'year': '2023',
-      'image': 'assets/vinyl2.png',
+      'image': 'assets/vinyl1.png',
       'songCount': 10,
     },
     {
       'title': 'City Lights',
       'artist': 'CUPSIZE',
       'year': '2024',
-      'image': 'assets/vinyl3.png',
+      'image': 'assets/vinyl2.png',
       'songCount': 14,
     },
     {
       'title': 'Neon Nights',
       'artist': 'shibob',
       'year': '2023',
-      'image': 'assets/vinyl4.png',
+      'image': 'assets/vinyl3.png',
       'songCount': 11,
     },
   ];
@@ -83,25 +110,25 @@ class _LibraryScreenState extends State<LibraryScreen> {
       'title': 'Mad Boy',
       'artist': 'ALKUN & AI',
       'type': 'song',
-      'image': 'assets/vinyl1.png',
+      'image': 'assets/vinyl4.png',
     },
     {
       'title': 'Tokyo Drift',
       'artist': 'Yoshimura',
       'type': 'album',
-      'image': 'assets/vinyl2.png',
+      'image': 'assets/vinyl5.png',
     },
     {
       'title': 'Daily Mix 1',
       'artist': 'Плейлист',
       'type': 'playlist',
-      'image': 'assets/vinyl3.png',
+      'image': 'assets/31fed70fb44cf684397169b327cab9d5.jpg',
     },
     {
       'title': 'Night Drive',
       'artist': 'CUPSIZE',
       'type': 'song',
-      'image': 'assets/vinyl4.png',
+      'image': 'assets/41dc8e4e6ceab592fbb46b5e3f545dac.jpg',
     },
   ];
 
@@ -131,16 +158,17 @@ class _LibraryScreenState extends State<LibraryScreen> {
     }
 
     if (_selectedFilter == 'Все' || _selectedFilter == 'Песни') {
-      final filtered = _getFavoriteSongs().where((s) {
-        return s.title.toLowerCase().contains(query) ||
-            s.artist.toLowerCase().contains(query);
+      final songs = _getFavoriteSongs();
+      final filtered = songs.where((s) {
+        return (s['title'] as String).toLowerCase().contains(query) ||
+            (s['artist'] as String).toLowerCase().contains(query);
       }).toList();
       items.addAll(
         filtered.map(
           (s) => <String, dynamic>{
-            'title': s.title,
-            'artist': s.artist,
-            'coverPath': s.coverPath,
+            'title': s['title'],
+            'artist': s['artist'],
+            'coverPath': s['coverPath'],
             'type': 'song',
           },
         ),
@@ -161,7 +189,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF171716),
+      backgroundColor: ThemeManager.instance.backgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -175,7 +203,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         'Медиатека',
                         style: TextStyle(
                           fontSize: 32,
@@ -186,7 +214,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                       IconButton(
                         icon: Icon(
                           _isSearching ? Icons.close : Icons.search,
-                          color: const Color(0xFFEFEDE3),
+                          color: ThemeManager.instance.textColor,
                         ),
                         onPressed: () {
                           setState(() {
@@ -206,13 +234,13 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         color: const Color(0xFF3D3B37),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: const Color(0xFFEFEDE3).withValues(alpha: 0.2),
+                          color: ThemeManager.instance.textColor.withValues(alpha: 0.2),
                           width: 1,
                         ),
                       ),
                       child: TextField(
                         controller: _searchController,
-                        style: const TextStyle(color: Color(0xFFEFEDE3)),
+                        style: TextStyle(color: Color(0xFFEFEDE3)),
                         decoration: InputDecoration(
                           hintText: 'Поиск в медиатеке...',
                           hintStyle: TextStyle(
@@ -220,7 +248,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                               0xFFEFEDE3,
                             ).withValues(alpha: 0.6),
                           ),
-                          prefixIcon: const Icon(
+                          prefixIcon: Icon(
                             Icons.search,
                             color: Color(0xFFEFEDE3),
                             size: 20,
@@ -301,8 +329,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   });
                 }
               },
-              backgroundColor: const Color(0xFFEFEDE3),
-              child: const Icon(Icons.add, color: Color(0xFF171716)),
+              backgroundColor: ThemeManager.instance.textColor,
+              child: Icon(Icons.add, color: Color(0xFF171716)),
             )
           : null,
     );
@@ -338,10 +366,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => SongsScreen(
-                      playlistTitle: 'Любимые песни',
-                      songs: _getFavoriteSongs(),
-                    ),
+                    builder: (context) => const SongsScreen(),
                   ),
                 );
               },
@@ -350,8 +375,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 height: 140,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: const Color(0xFFEFEDE3), width: 2),
-                  color: const Color(0xFFEFEDE3).withValues(alpha: 0.2),
+                  border: Border.all(color: ThemeManager.instance.textColor, width: 2),
+                  color: ThemeManager.instance.textColor.withValues(alpha: 0.2),
                 ),
                 child: Stack(
                   children: [
@@ -359,7 +384,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(16),
                         child: Image.asset(
-                          'assets/vinyl1.png',
+                          'assets/4db574e2cee0e13f00f9351a356fc21d.jpg',
                           fit: BoxFit.cover,
                           color: const Color(0xFF000000).withOpacity(0.25),
                           colorBlendMode: BlendMode.darken,
@@ -373,7 +398,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                       top: 10,
                       child: Icon(
                         Icons.edit,
-                        color: const Color(0xFFEFEDE3),
+                        color: ThemeManager.instance.textColor,
                         size: 20,
                       ),
                     ),
@@ -385,10 +410,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
                           height: 80,
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFEFEDE3),
+                            color: ThemeManager.instance.textColor,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: const Color(0xFFEFEDE3),
+                              color: ThemeManager.instance.textColor,
                               width: 2,
                             ),
                           ),
@@ -406,7 +431,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                     width: 2,
                                   ),
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.favorite,
                                   color: Colors.black,
                                 ),
@@ -453,7 +478,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                     width: 2,
                                   ),
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.play_arrow,
                                   color: Colors.black,
                                 ),
@@ -489,7 +514,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Ваши Плейлисты',
                   style: TextStyle(
                     fontSize: 24,
@@ -500,7 +525,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 TextButton(
                   onPressed: () =>
                       setState(() => _selectedFilter = 'Плейлисты'),
-                  child: const Text(
+                  child: Text(
                     'Все',
                     style: TextStyle(color: Color(0xFFEFEDE3)),
                   ),
@@ -524,7 +549,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Ваши Артисты',
                   style: TextStyle(
                     fontSize: 24,
@@ -534,7 +559,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 ),
                 TextButton(
                   onPressed: () => setState(() => _selectedFilter = 'Артисты'),
-                  child: const Text(
+                  child: Text(
                     'Все',
                     style: TextStyle(color: Color(0xFFEFEDE3)),
                   ),
@@ -617,7 +642,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Альбомы',
                   style: TextStyle(
                     fontSize: 24,
@@ -627,7 +652,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 ),
                 TextButton(
                   onPressed: () => setState(() => _selectedFilter = 'Альбомы'),
-                  child: const Text(
+                  child: Text(
                     'Все',
                     style: TextStyle(color: Color(0xFFEFEDE3)),
                   ),
@@ -664,7 +689,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
           children: [
             Text(
               'Плейлисты (${_playlists.length})',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFFEFEDE3),
@@ -688,15 +713,15 @@ class _LibraryScreenState extends State<LibraryScreen> {
             children: [
               Text(
                 'Артисты (${_artists.length})',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFFEFEDE3),
                 ),
               ),
               PopupMenuButton<String>(
-                icon: const Icon(Icons.sort, color: Color(0xFFEFEDE3)),
-                color: const Color(0xFF1C1C1C),
+                icon: Icon(Icons.sort, color: Color(0xFFEFEDE3)),
+                color: ThemeManager.instance.secondaryBackgroundColor,
                 onSelected: (value) {
                   // TODO: Implement sorting
                 },
@@ -748,15 +773,15 @@ class _LibraryScreenState extends State<LibraryScreen> {
           children: [
             Text(
               'Песни (${songs.length})',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFFEFEDE3),
               ),
             ),
             PopupMenuButton<String>(
-              icon: const Icon(Icons.sort, color: Color(0xFFEFEDE3)),
-              color: const Color(0xFF1C1C1C),
+              icon: Icon(Icons.sort, color: Color(0xFFEFEDE3)),
+              color: ThemeManager.instance.secondaryBackgroundColor,
               onSelected: (value) {
                 // TODO: Implement sorting
               },
@@ -802,15 +827,15 @@ class _LibraryScreenState extends State<LibraryScreen> {
             children: [
               Text(
                 'Альбомы (${_albums.length})',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFFEFEDE3),
                 ),
               ),
               PopupMenuButton<String>(
-                icon: const Icon(Icons.sort, color: Color(0xFFEFEDE3)),
-                color: const Color(0xFF1C1C1C),
+                icon: Icon(Icons.sort, color: Color(0xFFEFEDE3)),
+                color: ThemeManager.instance.secondaryBackgroundColor,
                 onSelected: (value) {
                   // TODO: Implement sorting
                 },
@@ -877,10 +902,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
         width: isGrid ? double.infinity : 140,
         height: isGrid ? null : 310,
         decoration: BoxDecoration(
-          color: const Color(0xFF1C1C1C),
+          color: ThemeManager.instance.secondaryBackgroundColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: const Color(0xFFEFEDE3).withValues(alpha: 0.1),
+            color: ThemeManager.instance.textColor.withValues(alpha: 0.1),
             width: 1,
           ),
         ),
@@ -905,8 +930,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
                             return Container(
-                              color: const Color(0xFF2A2A28),
-                              child: const Icon(
+                              color: ThemeManager.instance.secondaryBackgroundColor,
+                              child: Icon(
                                 Icons.album,
                                 color: Color(0xFFEFEDE3),
                                 size: 60,
@@ -920,8 +945,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
-                            color: const Color(0xFF2A2A28),
-                            child: const Icon(
+                            color: ThemeManager.instance.secondaryBackgroundColor,
+                            child: Icon(
                               Icons.album,
                               color: Color(0xFFEFEDE3),
                               size: 60,
@@ -943,7 +968,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   children: [
                     Text(
                       album['title'] as String,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Color(0xFFEFEDE3),
                         fontSize: 19,
                         fontWeight: FontWeight.bold,
@@ -957,7 +982,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     Text(
                       album['artist'] as String,
                       style: TextStyle(
-                        color: const Color(0xFFEFEDE3).withValues(alpha: 0.7),
+                        color: ThemeManager.instance.textColor.withValues(alpha: 0.7),
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
                       ),
@@ -969,7 +994,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                       Text(
                         '${album['year']} • ${album['songCount']} треков',
                         style: TextStyle(
-                          color: const Color(0xFFEFEDE3).withValues(alpha: 0.9),
+                          color: ThemeManager.instance.textColor.withValues(alpha: 0.9),
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
@@ -997,13 +1022,13 @@ class _LibraryScreenState extends State<LibraryScreen> {
             Icon(
               Icons.search_off,
               size: 64,
-              color: const Color(0xFFEFEDE3).withValues(alpha: 0.3),
+              color: ThemeManager.instance.textColor.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 16),
             Text(
               'Ничего не найдено',
               style: TextStyle(
-                color: const Color(0xFFEFEDE3).withValues(alpha: 0.6),
+                color: ThemeManager.instance.textColor.withValues(alpha: 0.6),
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
@@ -1046,10 +1071,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF1C1C1C),
+          color: ThemeManager.instance.secondaryBackgroundColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: const Color(0xFFEFEDE3).withValues(alpha: 0.1),
+            color: ThemeManager.instance.textColor.withValues(alpha: 0.1),
             width: 1,
           ),
         ),
@@ -1057,7 +1082,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
           children: [
             Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFFEFEDE3),
@@ -1068,7 +1093,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
               label,
               style: TextStyle(
                 fontSize: 12,
-                color: const Color(0xFFEFEDE3).withValues(alpha: 0.6),
+                color: ThemeManager.instance.textColor.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -1103,7 +1128,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: const Color(0xFFEFEDE3).withValues(alpha: 0.2),
+                  color: ThemeManager.instance.textColor.withValues(alpha: 0.2),
                   width: 2,
                 ),
               ),
@@ -1113,8 +1138,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
-                      color: const Color(0xFF2A2A28),
-                      child: const Icon(
+                      color: ThemeManager.instance.secondaryBackgroundColor,
+                      child: Icon(
                         Icons.person,
                         color: Color(0xFFEFEDE3),
                         size: 60,
@@ -1129,7 +1154,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
               width: 120,
               child: Text(
                 artist['name'] as String,
-                style: const TextStyle(
+                style: TextStyle(
                   color: Color(0xFFEFEDE3),
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -1157,10 +1182,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF1C1C1C),
+          color: ThemeManager.instance.secondaryBackgroundColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: const Color(0xFFEFEDE3).withValues(alpha: 0.1),
+            color: ThemeManager.instance.textColor.withValues(alpha: 0.1),
             width: 1,
           ),
         ),
@@ -1181,8 +1206,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
-                        color: const Color(0xFF2A2A28),
-                        child: const Icon(
+                        color: ThemeManager.instance.secondaryBackgroundColor,
+                        child: Icon(
                           Icons.person,
                           color: Color(0xFFEFEDE3),
                           size: 60,
@@ -1200,7 +1225,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 children: [
                   Text(
                     artist['name'] as String,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Color(0xFFEFEDE3),
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -1212,7 +1237,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   Text(
                     '${artist['listeners']} слушателей',
                     style: TextStyle(
-                      color: const Color(0xFFEFEDE3).withValues(alpha: 0.6),
+                      color: ThemeManager.instance.textColor.withValues(alpha: 0.6),
                       fontSize: 12,
                     ),
                   ),
@@ -1229,15 +1254,19 @@ class _LibraryScreenState extends State<LibraryScreen> {
     return GestureDetector(
       onTap: () {
         if (item['type'] == 'song') {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => PlayerScreen(
-                songTitle: item['title'] as String,
-                artist: item['artist'] as String,
-                coverPath: item['image'] as String,
-              ),
-            ),
+          // Ищем трек в MusicService
+          final tracks = _musicService.tracks;
+          final track = tracks.firstWhere(
+            (t) => t.title == item['title'] && t.artist == item['artist'],
+            orElse: () => Track.fromFileName(''),
           );
+          if (track.id.isNotEmpty) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => PlayerScreen(track: track),
+              ),
+            );
+          }
         } else if (item['type'] == 'playlist') {
           Navigator.of(context).push(
             MaterialPageRoute(
@@ -1255,10 +1284,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
         width: 140,
         height: 220,
         decoration: BoxDecoration(
-          color: const Color(0xFF1C1C1C),
+          color: ThemeManager.instance.secondaryBackgroundColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: const Color(0xFFEFEDE3).withValues(alpha: 0.1),
+            color: ThemeManager.instance.textColor.withValues(alpha: 0.1),
             width: 1,
           ),
         ),
@@ -1281,12 +1310,12 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
-                      color: const Color(0xFF2A2A28),
+                      color: ThemeManager.instance.secondaryBackgroundColor,
                       child: Icon(
                         item['type'] == 'song'
                             ? Icons.music_note
                             : Icons.playlist_play,
-                        color: const Color(0xFFEFEDE3),
+                        color: ThemeManager.instance.textColor,
                         size: 40,
                       ),
                     );
@@ -1304,7 +1333,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     Flexible(
                       child: Text(
                         item['title'] as String,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Color(0xFFEFEDE3),
                           fontSize: 21,
                           fontWeight: FontWeight.bold,
@@ -1319,7 +1348,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                       child: Text(
                         item['artist'] as String,
                         style: TextStyle(
-                          color: const Color(0xFFEFEDE3).withValues(alpha: 0.7),
+                          color: ThemeManager.instance.textColor.withValues(alpha: 0.7),
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -1337,7 +1366,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
     );
   }
 
-  Widget _buildSongItem(SongData song) {
+  Widget _buildSongItem(Map<String, dynamic> song) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
       leading: Container(
@@ -1346,20 +1375,20 @@ class _LibraryScreenState extends State<LibraryScreen> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: const Color(0xFFEFEDE3).withValues(alpha: 0.1),
+            color: ThemeManager.instance.textColor.withValues(alpha: 0.1),
             width: 1,
           ),
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(7),
-          child: song.coverPath != null
+          child: (song['coverPath'] as String?) != null && (song['coverPath'] as String).isNotEmpty
               ? Image.asset(
-                  song.coverPath!,
+                  song['coverPath'] as String,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
-                      color: const Color(0xFF2A2A28),
-                      child: const Icon(
+                      color: ThemeManager.instance.secondaryBackgroundColor,
+                      child: Icon(
                         Icons.music_note,
                         color: Color(0xFFEFEDE3),
                       ),
@@ -1367,50 +1396,34 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   },
                 )
               : Container(
-                  color: const Color(0xFF2A2A28),
-                  child: const Icon(Icons.music_note, color: Color(0xFFEFEDE3)),
+                  color: ThemeManager.instance.secondaryBackgroundColor,
+                  child: Icon(Icons.music_note, color: Color(0xFFEFEDE3)),
                 ),
         ),
       ),
       title: Text(
-        song.title,
-        style: const TextStyle(
+        song['title'] as String,
+        style: TextStyle(
           color: Color(0xFFEFEDE3),
           fontSize: 16,
           fontWeight: FontWeight.w600,
         ),
       ),
       subtitle: Text(
-        song.artist,
+        song['artist'] as String,
         style: TextStyle(
-          color: const Color(0xFFEFEDE3).withValues(alpha: 0.6),
+          color: ThemeManager.instance.textColor.withValues(alpha: 0.6),
           fontSize: 14,
         ),
       ),
       trailing: IconButton(
-        icon: const Icon(Icons.play_arrow, color: Color(0xFFEFEDE3)),
+        icon: Icon(Icons.play_arrow, color: Color(0xFFEFEDE3)),
         onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => PlayerScreen(
-                songTitle: song.title,
-                artist: song.artist,
-                coverPath: song.coverPath ?? 'assets/vinyl1.png',
-              ),
-            ),
-          );
+          _playTrack(song['title'] as String, song['artist'] as String);
         },
       ),
       onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => PlayerScreen(
-              songTitle: song.title,
-              artist: song.artist,
-              coverPath: song.coverPath ?? 'assets/vinyl1.png',
-            ),
-          ),
-        );
+        _playTrack(song['title'] as String, song['artist'] as String);
       },
     );
   }
@@ -1424,21 +1437,21 @@ class _LibraryScreenState extends State<LibraryScreen> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: const Color(0xFFEFEDE3).withValues(alpha: 0.2),
+            color: ThemeManager.instance.textColor.withValues(alpha: 0.2),
             width: 1,
           ),
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(7),
           child: Container(
-            color: const Color(0xFF2A2A28),
-            child: const Icon(Icons.music_note, color: Color(0xFFEFEDE3)),
+            color: ThemeManager.instance.secondaryBackgroundColor,
+            child: Icon(Icons.music_note, color: Color(0xFFEFEDE3)),
           ),
         ),
       ),
       title: Text(
         song['title'] as String,
-        style: const TextStyle(
+        style: TextStyle(
           color: Color(0xFFEFEDE3),
           fontSize: 16,
           fontWeight: FontWeight.w600,
@@ -1447,21 +1460,13 @@ class _LibraryScreenState extends State<LibraryScreen> {
       subtitle: Text(
         song['artist'] as String,
         style: TextStyle(
-          color: const Color(0xFFEFEDE3).withValues(alpha: 0.6),
+          color: ThemeManager.instance.textColor.withValues(alpha: 0.6),
           fontSize: 14,
         ),
       ),
-      trailing: const Icon(Icons.chevron_right, color: Color(0xFFEFEDE3)),
+      trailing: Icon(Icons.chevron_right, color: Color(0xFFEFEDE3)),
       onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => PlayerScreen(
-              songTitle: song['title'] as String,
-              artist: song['artist'] as String,
-              coverPath: song['coverPath'] ?? 'assets/vinyl1.png',
-            ),
-          ),
-        );
+        _playTrack(song['title'] as String, song['artist'] as String);
       },
     );
   }
@@ -1475,7 +1480,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
-            color: const Color(0xFFEFEDE3).withValues(alpha: 0.2),
+            color: ThemeManager.instance.textColor.withValues(alpha: 0.2),
             width: 1,
           ),
         ),
@@ -1485,8 +1490,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) {
               return Container(
-                color: const Color(0xFF2A2A28),
-                child: const Icon(Icons.person, color: Color(0xFFEFEDE3)),
+                color: ThemeManager.instance.secondaryBackgroundColor,
+                child: Icon(Icons.person, color: Color(0xFFEFEDE3)),
               );
             },
           ),
@@ -1494,7 +1499,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
       ),
       title: Text(
         artist['name'] as String,
-        style: const TextStyle(
+        style: TextStyle(
           color: Color(0xFFEFEDE3),
           fontSize: 16,
           fontWeight: FontWeight.w600,
@@ -1503,11 +1508,11 @@ class _LibraryScreenState extends State<LibraryScreen> {
       subtitle: Text(
         '${artist['listeners']} слушателей',
         style: TextStyle(
-          color: const Color(0xFFEFEDE3).withValues(alpha: 0.6),
+          color: ThemeManager.instance.textColor.withValues(alpha: 0.6),
           fontSize: 14,
         ),
       ),
-      trailing: const Icon(Icons.chevron_right, color: Color(0xFFEFEDE3)),
+      trailing: Icon(Icons.chevron_right, color: Color(0xFFEFEDE3)),
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
@@ -1531,7 +1536,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: const Color(0xFFEFEDE3).withValues(alpha: 0.2),
+            color: ThemeManager.instance.textColor.withValues(alpha: 0.2),
             width: 1,
           ),
         ),
@@ -1542,8 +1547,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) {
               return Container(
-                color: const Color(0xFF2A2A28),
-                child: const Icon(Icons.album, color: Color(0xFFEFEDE3)),
+                color: ThemeManager.instance.secondaryBackgroundColor,
+                child: Icon(Icons.album, color: Color(0xFFEFEDE3)),
               );
             },
           ),
@@ -1551,7 +1556,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
       ),
       title: Text(
         album['title'] as String,
-        style: const TextStyle(
+        style: TextStyle(
           color: Color(0xFFEFEDE3),
           fontSize: 16,
           fontWeight: FontWeight.w600,
@@ -1560,11 +1565,11 @@ class _LibraryScreenState extends State<LibraryScreen> {
       subtitle: Text(
         '${album['artist']} • ${album['year']}',
         style: TextStyle(
-          color: const Color(0xFFEFEDE3).withValues(alpha: 0.6),
+          color: ThemeManager.instance.textColor.withValues(alpha: 0.6),
           fontSize: 14,
         ),
       ),
-      trailing: const Icon(Icons.chevron_right, color: Color(0xFFEFEDE3)),
+      trailing: Icon(Icons.chevron_right, color: Color(0xFFEFEDE3)),
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
@@ -1581,35 +1586,45 @@ class _LibraryScreenState extends State<LibraryScreen> {
   }
 
   // Helper method to get favorite songs list
-  List<SongData> _getFavoriteSongs() {
+  List<Map<String, dynamic>> _getFavoriteSongs() {
+    // Используем реальные треки из MusicService, если они есть
+    if (_musicService.tracks.isNotEmpty) {
+      return _musicService.tracks.map((track) => {
+        'title': track.title,
+        'artist': track.artist,
+        'coverPath': track.coverPath,
+      }).toList();
+    }
+    
+    // Fallback на mock данные
     return [
-      SongData(
-        title: 'Mad Boy',
-        artist: 'ALKUN & AI',
-        coverPath: 'assets/vinyl1.png',
-      ),
-      SongData(
-        title: 'Reset - Plastic tree',
-        artist: 'shibob',
-        coverPath: null,
-      ),
-      SongData(title: 'Neon Lights', artist: 'Yoshimura', coverPath: null),
-      SongData(
-        title: 'Tokyo Drift',
-        artist: 'shit, денди, Amorbius',
-        coverPath: null,
-      ),
-      SongData(title: 'Moonlight', artist: 'aishi', coverPath: null),
-      SongData(title: 'Summer Vibes', artist: 'Kireko', coverPath: null),
-      SongData(title: 'Night Drive', artist: 'shibob', coverPath: null),
-      SongData(title: 'City Lights', artist: 'ALKUN', coverPath: null),
-      SongData(title: 'Rain Dance', artist: 'Yoshimura', coverPath: null),
-      SongData(title: 'Electric Dreams', artist: 'AI', coverPath: null),
-      SongData(title: 'Sunset Boulevard', artist: 'денди', coverPath: null),
-      SongData(title: 'Starlight', artist: 'Amorbius', coverPath: null),
-      SongData(title: 'Ocean Waves', artist: 'aishi', coverPath: null),
-      SongData(title: 'Mountain Echo', artist: 'Kireko', coverPath: null),
-      SongData(title: 'Urban Jungle', artist: 'shibob', coverPath: null),
+      {
+        'title': 'Mad Boy',
+        'artist': 'ALKUN & AI',
+        'coverPath': 'assets/746327ec1c669b09f965de5d195198e8.jpg',
+      },
+      {
+        'title': 'Reset - Plastic tree',
+        'artist': 'shibob',
+        'coverPath': null,
+      },
+      {'title': 'Neon Lights', 'artist': 'Yoshimura', 'coverPath': null},
+      {
+        'title': 'Tokyo Drift',
+        'artist': 'shit, денди, Amorbius',
+        'coverPath': null,
+      },
+      {'title': 'Moonlight', 'artist': 'aishi', 'coverPath': null},
+      {'title': 'Summer Vibes', 'artist': 'Kireko', 'coverPath': null},
+      {'title': 'Night Drive', 'artist': 'shibob', 'coverPath': null},
+      {'title': 'City Lights', 'artist': 'ALKUN', 'coverPath': null},
+      {'title': 'Rain Dance', 'artist': 'Yoshimura', 'coverPath': null},
+      {'title': 'Electric Dreams', 'artist': 'AI', 'coverPath': null},
+      {'title': 'Sunset Boulevard', 'artist': 'денди', 'coverPath': null},
+      {'title': 'Starlight', 'artist': 'Amorbius', 'coverPath': null},
+      {'title': 'Ocean Waves', 'artist': 'aishi', 'coverPath': null},
+      {'title': 'Mountain Echo', 'artist': 'Kireko', 'coverPath': null},
+      {'title': 'Urban Jungle', 'artist': 'shibob', 'coverPath': null},
     ];
   }
 }
@@ -1631,14 +1646,14 @@ class _FilterChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFFEFEDE3) : Colors.transparent,
+          color: selected ? ThemeManager.instance.textColor : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFEFEDE3), width: 2),
+          border: Border.all(color: ThemeManager.instance.textColor, width: 2),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: selected ? Colors.black : const Color(0xFFEFEDE3),
+            color: selected ? Colors.black : ThemeManager.instance.textColor,
             fontWeight: FontWeight.w600,
             fontSize: 13,
           ),
@@ -1679,8 +1694,8 @@ class _PlaylistRow extends StatelessWidget {
               width: 84,
               height: 84,
               decoration: BoxDecoration(
-                color: const Color(0xFF1C1C1C),
-                border: Border.all(color: const Color(0xFFEFEDE3), width: 2),
+                color: ThemeManager.instance.secondaryBackgroundColor,
+                border: Border.all(color: ThemeManager.instance.textColor, width: 2),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: ClipRRect(
@@ -1695,7 +1710,7 @@ class _PlaylistRow extends StatelessWidget {
                 children: [
                   Text(
                     playlist['title'] as String,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Color(0xFFEFEDE3),
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
@@ -1704,7 +1719,7 @@ class _PlaylistRow extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     '${playlist['songCount']} треков',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Color(0xFFB8B6B0),
                       fontSize: 13,
                     ),
@@ -1714,7 +1729,7 @@ class _PlaylistRow extends StatelessWidget {
             ),
             IconButton(
               onPressed: () {},
-              icon: const Icon(Icons.play_arrow, color: Color(0xFFEFEDE3)),
+              icon: Icon(Icons.play_arrow, color: Color(0xFFEFEDE3)),
             ),
           ],
         ),
@@ -1729,8 +1744,8 @@ class _PlaylistRow extends StatelessWidget {
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
           return Container(
-            color: const Color(0xFF3D3C38),
-            child: const Icon(
+            color: ThemeManager.instance.secondaryBackgroundColor,
+            child: Icon(
               Icons.playlist_play,
               size: 40,
               color: Colors.white54,
@@ -1744,8 +1759,8 @@ class _PlaylistRow extends StatelessWidget {
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
           return Container(
-            color: const Color(0xFF3D3C38),
-            child: const Icon(
+            color: ThemeManager.instance.secondaryBackgroundColor,
+            child: Icon(
               Icons.playlist_play,
               size: 40,
               color: Colors.white54,

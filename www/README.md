@@ -63,6 +63,28 @@ flutter doctor
    flutter devices
    ```
 
+### Быстрое обновление симулятора (Hot Reload)
+
+1. Запусти приложение один раз:
+
+```bash
+cd /Users/aliakbar/WhiteDisk2/www
+flutter run -d "iPhone 17"
+```
+
+2. Когда меняешь код:
+
+- `r` + Enter — быстрый hot reload (сохраняет состояние)
+- `R` + Enter — полный hot restart
+- `q` + Enter — выход из `flutter run`
+
+Если симулятор выключен:
+
+```bash
+xcrun simctl boot "iPhone 17"
+open -a Simulator
+```
+
 ### macOS
 
 ```bash

@@ -1,7 +1,27 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'theme_manager.dart';
+
+class ThemePreset {
+  final String name;
+  final Color primaryColor;
+  final Color backgroundColor;
+  final Color secondaryBackgroundColor;
+  final Color textColor;
+  final Color secondaryTextColor;
+
+  const ThemePreset({
+    required this.name,
+    required this.primaryColor,
+    required this.backgroundColor,
+    required this.secondaryBackgroundColor,
+    required this.textColor,
+    required this.secondaryTextColor,
+  });
+}
 
 class CustomizationScreen extends StatefulWidget {
   const CustomizationScreen({super.key});
@@ -13,6 +33,41 @@ class CustomizationScreen extends StatefulWidget {
 class _CustomizationScreenState extends State<CustomizationScreen> {
   final ThemeManager _themeManager = ThemeManager.instance;
   final ImagePicker _imagePicker = ImagePicker();
+
+  final List<ThemePreset> _presets = const [
+    ThemePreset(
+      name: 'Classic',
+      primaryColor: Color(0xFFEFEDE3),
+      backgroundColor: Color(0xFF171716),
+      secondaryBackgroundColor: Color(0xFF1C1C1C),
+      textColor: Color(0xFFEFEDE3),
+      secondaryTextColor: Color(0xFFB8B6B0),
+    ),
+    ThemePreset(
+      name: 'Neon',
+      primaryColor: Color(0xFF7CF9FF),
+      backgroundColor: Color(0xFF0E0B16),
+      secondaryBackgroundColor: Color(0xFF1A1430),
+      textColor: Color(0xFFEFFBFF),
+      secondaryTextColor: Color(0xFF9CC5D9),
+    ),
+    ThemePreset(
+      name: 'Rose',
+      primaryColor: Color(0xFFF4B2C1),
+      backgroundColor: Color(0xFF1E1519),
+      secondaryBackgroundColor: Color(0xFF2A1B22),
+      textColor: Color(0xFFF7E9ED),
+      secondaryTextColor: Color(0xFFC9A4AE),
+    ),
+    ThemePreset(
+      name: 'Emerald',
+      primaryColor: Color(0xFF86F0C4),
+      backgroundColor: Color(0xFF0F1C17),
+      secondaryBackgroundColor: Color(0xFF14251E),
+      textColor: Color(0xFFE6FFF6),
+      secondaryTextColor: Color(0xFF9CCBB8),
+    ),
+  ];
   
   // Фоновое изображение
   File? _backgroundImage;
@@ -425,6 +480,42 @@ class _CustomizationScreenState extends State<CustomizationScreen> {
     return luminance > 0.5 ? Colors.black : Colors.white;
   }
 
+  Widget _buildPresetChip(ThemePreset preset) {
+    return InkWell(
+      onTap: () => _applyPreset(preset),
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: _themeManager.secondaryBackgroundColor,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: _themeManager.primaryColor.withValues(alpha: 0.2),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 16,
+              height: 16,
+              decoration: BoxDecoration(
+                color: preset.primaryColor,
+                shape: BoxShape.circle,
+                border: Border.all(color: _themeManager.backgroundColor),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              preset.name,
+              style: TextStyle(color: _themeManager.textColor),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _applyColor() {
     setState(() {
       switch (_pickingType) {
@@ -439,6 +530,96 @@ class _CustomizationScreenState extends State<CustomizationScreen> {
           break;
       }
     });
+  }
+
+  void _applyPreset(ThemePreset preset) {
+    _themeManager.applyMap({
+      'primaryColor': preset.primaryColor.value,
+      'backgroundColor': preset.backgroundColor.value,
+      'secondaryBackgroundColor': preset.secondaryBackgroundColor.value,
+      'textColor': preset.textColor.value,
+      'secondaryTextColor': preset.secondaryTextColor.value,
+    });
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Пресет "${preset.name}" применен'),
+          backgroundColor: _themeManager.primaryColor,
+        ),
+      );
+    }
+  }
+
+  Future<void> _exportTheme() async {
+    final jsonText = jsonEncode(_themeManager.toMap());
+    await Clipboard.setData(ClipboardData(text: jsonText));
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Тема скопирована в буфер'),
+          backgroundColor: _themeManager.primaryColor,
+        ),
+      );
+    }
+  }
+
+  Future<void> _importTheme() async {
+    final controller = TextEditingController();
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: _themeManager.secondaryBackgroundColor,
+        title: Text(
+          'Импорт темы',
+          style: TextStyle(color: _themeManager.textColor),
+        ),
+        content: TextField(
+          controller: controller,
+          maxLines: 6,
+          style: TextStyle(color: _themeManager.textColor),
+          decoration: InputDecoration(
+            hintText: 'Вставь JSON темы',
+            hintStyle: TextStyle(color: _themeManager.secondaryTextColor),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: _themeManager.primaryColor.withValues(alpha: 0.2)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: _themeManager.primaryColor),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Отмена',
+              style: TextStyle(color: _themeManager.secondaryTextColor),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              try {
+                final data = jsonDecode(controller.text) as Map<String, dynamic>;
+                _themeManager.applyMap(data);
+                Navigator.of(context).pop();
+              } catch (_) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Неверный JSON'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _themeManager.primaryColor,
+              foregroundColor: _getContrastColor(_themeManager.primaryColor),
+            ),
+            child: const Text('Импорт'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -478,6 +659,71 @@ class _CustomizationScreenState extends State<CustomizationScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              'Пресеты',
+              style: TextStyle(
+                color: _themeManager.textColor,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 54,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: _presets.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                itemBuilder: (context, index) {
+                  final preset = _presets[index];
+                  return _buildPresetChip(preset);
+                },
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Экспорт / Импорт',
+              style: TextStyle(
+                color: _themeManager.textColor,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: _exportTheme,
+                    icon: Icon(Icons.copy, color: _themeManager.textColor),
+                    label: Text(
+                      'Экспорт',
+                      style: TextStyle(color: _themeManager.textColor),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _themeManager.primaryColor.withValues(alpha: 0.1),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: _importTheme,
+                    icon: Icon(Icons.file_upload, color: _themeManager.textColor),
+                    label: Text(
+                      'Импорт',
+                      style: TextStyle(color: _themeManager.textColor),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _themeManager.primaryColor.withValues(alpha: 0.1),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
             // Фоновое изображение
             Text(
               'Фоновое изображение',

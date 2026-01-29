@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'theme_manager.dart';
 import 'artist_screen.dart';
 import 'playlist_screen.dart';
 import 'player_screen.dart';
+import 'music_service.dart';
+import 'track_model.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -14,6 +17,18 @@ class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   List<String> _searchHistory = [];
   String _selectedFilter = 'Все'; // Все, Песни, Артисты, Плейлисты
+  final MusicService _musicService = MusicService();
+  
+  /// Поиск трека по названию и артисту
+  Track? _findTrack(String title, String artist) {
+    try {
+      return _musicService.tracks.firstWhere(
+        (t) => t.title == title && t.artist == artist,
+      );
+    } catch (e) {
+      return null;
+    }
+  }
   
   // Популярные запросы
   final List<String> _popularQueries = [
@@ -47,22 +62,22 @@ class _SearchScreenState extends State<SearchScreen> {
 
   // Изображения для коллекций (используем vinyl*.png)
   final List<String> _collectionImages = [
+    'assets/8c5e2c48628416f0b7464f79596ec0df.jpg',
+    'assets/9a7871b01076799c9d4d95fec3d14e06.jpg',
+    'assets/b64ab0d02093bf822f74375c79e24e23.jpg',
+    'assets/b8be167d06c4a74174af808843cb9db4.jpg',
+    'assets/cdf42b8bf42351fdf0aed76a1efa1a4d.jpg',
+    'assets/dada9e612a304c6228f597fb30f58d31.jpg',
+    'assets/e27ce83b1f94fe83ef3cc161d1d066ae.jpg',
     'assets/vinyl1.png',
     'assets/vinyl2.png',
     'assets/vinyl3.png',
     'assets/vinyl4.png',
-    'assets/vinyl1.png',
-    'assets/vinyl2.png',
-    'assets/vinyl3.png',
-    'assets/vinyl4.png',
-    'assets/vinyl1.png',
-    'assets/vinyl2.png',
-    'assets/vinyl3.png',
-    'assets/vinyl4.png',
-    'assets/vinyl1.png',
-    'assets/vinyl2.png',
-    'assets/vinyl3.png',
-    'assets/vinyl4.png',
+    'assets/vinyl5.png',
+    'assets/31fed70fb44cf684397169b327cab9d5.jpg',
+    'assets/41dc8e4e6ceab592fbb46b5e3f545dac.jpg',
+    'assets/4db574e2cee0e13f00f9351a356fc21d.jpg',
+    'assets/746327ec1c669b09f965de5d195198e8.jpg',
   ];
 
   // Мок-данные для результатов поиска
@@ -90,10 +105,10 @@ class _SearchScreenState extends State<SearchScreen> {
     // Артисты
     if (_selectedFilter == 'Все' || _selectedFilter == 'Артисты') {
       final artists = [
-        {'name': 'ALKUN', 'listeners': '5.4M', 'type': 'artist', 'image': 'assets/vinyl1.png'},
-        {'name': 'Yoshimura', 'listeners': '3.2M', 'type': 'artist', 'image': 'assets/vinyl2.png'},
-        {'name': 'CUPSIZE', 'listeners': '2.8M', 'type': 'artist', 'image': 'assets/vinyl3.png'},
-        {'name': 'shibob', 'listeners': '1.9M', 'type': 'artist', 'image': 'assets/vinyl4.png'},
+        {'name': 'ALKUN', 'listeners': '5.4M', 'type': 'artist', 'image': 'assets/8c5e2c48628416f0b7464f79596ec0df.jpg'},
+        {'name': 'Yoshimura', 'listeners': '3.2M', 'type': 'artist', 'image': 'assets/9a7871b01076799c9d4d95fec3d14e06.jpg'},
+        {'name': 'CUPSIZE', 'listeners': '2.8M', 'type': 'artist', 'image': 'assets/b64ab0d02093bf822f74375c79e24e23.jpg'},
+        {'name': 'shibob', 'listeners': '1.9M', 'type': 'artist', 'image': 'assets/b8be167d06c4a74174af808843cb9db4.jpg'},
       ];
       for (var artist in artists) {
         if (artist['name'].toString().toLowerCase().contains(queryLower)) {
@@ -105,10 +120,10 @@ class _SearchScreenState extends State<SearchScreen> {
     // Плейлисты
     if (_selectedFilter == 'Все' || _selectedFilter == 'Плейлисты') {
       final playlists = [
-        {'title': 'Daily Mix 1', 'description': 'ALKUN, Yoshimura и другие', 'type': 'playlist', 'image': 'assets/vinyl1.png'},
-        {'title': 'Chill Vibes', 'description': 'Расслабляющая музыка', 'type': 'playlist', 'image': 'assets/vinyl2.png'},
-        {'title': 'Workout Mix', 'description': 'Энергичные треки', 'type': 'playlist', 'image': 'assets/vinyl3.png'},
-        {'title': 'Evening Relax', 'description': 'Вечерний отдых', 'type': 'playlist', 'image': 'assets/vinyl4.png'},
+        {'title': 'Daily Mix 1', 'description': 'ALKUN, Yoshimura и другие', 'type': 'playlist', 'image': 'assets/cdf42b8bf42351fdf0aed76a1efa1a4d.jpg'},
+        {'title': 'Chill Vibes', 'description': 'Расслабляющая музыка', 'type': 'playlist', 'image': 'assets/dada9e612a304c6228f597fb30f58d31.jpg'},
+        {'title': 'Workout Mix', 'description': 'Энергичные треки', 'type': 'playlist', 'image': 'assets/e27ce83b1f94fe83ef3cc161d1d066ae.jpg'},
+        {'title': 'Evening Relax', 'description': 'Вечерний отдых', 'type': 'playlist', 'image': 'assets/vinyl1.png'},
       ];
       for (var playlist in playlists) {
         if (playlist['title'].toString().toLowerCase().contains(queryLower) ||
@@ -130,7 +145,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF171716),
+      backgroundColor: ThemeManager.instance.backgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -140,7 +155,7 @@ class _SearchScreenState extends State<SearchScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Поиск',
                     style: TextStyle(
                       fontSize: 32,
@@ -155,26 +170,26 @@ class _SearchScreenState extends State<SearchScreen> {
                       color: const Color(0xFF3D3B37),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: const Color(0xFFEFEDE3).withValues(alpha: 0.2),
+                        color: ThemeManager.instance.textColor.withValues(alpha: 0.2),
                         width: 1,
                       ),
                     ),
                     child: TextField(
                       controller: _searchController,
-                      style: const TextStyle(color: Color(0xFFEFEDE3)),
+                      style: TextStyle(color: Color(0xFFEFEDE3)),
                       decoration: InputDecoration(
                         hintText: 'Артисты, песни или плейлисты',
                         hintStyle: TextStyle(
-                          color: const Color(0xFFEFEDE3).withValues(alpha: 0.6),
+                          color: ThemeManager.instance.textColor.withValues(alpha: 0.6),
                         ),
-                        prefixIcon: const Icon(
+                        prefixIcon: Icon(
                           Icons.search,
                           color: Color(0xFFEFEDE3),
                           size: 20,
                         ),
                         suffixIcon: _searchController.text.isNotEmpty
                             ? IconButton(
-                                icon: const Icon(
+                                icon: Icon(
                                   Icons.close,
                                   color: Color(0xFFEFEDE3),
                                   size: 20,
@@ -260,7 +275,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         'Недавние поиски',
                         style: TextStyle(
                           fontSize: 20,
@@ -274,7 +289,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             _searchHistory.clear();
                           });
                         },
-                        child: const Text(
+                        child: Text(
                           'Очистить',
                           style: TextStyle(
                             color: Color(0xFFEFEDE3),
@@ -300,10 +315,10 @@ class _SearchScreenState extends State<SearchScreen> {
                             vertical: 10,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1C1C1C),
+                            color: ThemeManager.instance.secondaryBackgroundColor,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: const Color(0xFFEFEDE3).withValues(alpha: 0.2),
+                              color: ThemeManager.instance.textColor.withValues(alpha: 0.2),
                               width: 1,
                             ),
                           ),
@@ -313,12 +328,12 @@ class _SearchScreenState extends State<SearchScreen> {
                               Icon(
                                 Icons.history,
                                 size: 16,
-                                color: const Color(0xFFEFEDE3).withValues(alpha: 0.6),
+                                color: ThemeManager.instance.textColor.withValues(alpha: 0.6),
                               ),
                               const SizedBox(width: 8),
                               Text(
                                 query,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: Color(0xFFEFEDE3),
                                   fontSize: 14,
                                 ),
@@ -344,7 +359,7 @@ class _SearchScreenState extends State<SearchScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Популярные запросы',
                   style: TextStyle(
                     fontSize: 20,
@@ -368,10 +383,10 @@ class _SearchScreenState extends State<SearchScreen> {
                           vertical: 10,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1C1C1C),
+                          color: ThemeManager.instance.secondaryBackgroundColor,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: const Color(0xFFEFEDE3).withValues(alpha: 0.2),
+                            color: ThemeManager.instance.textColor.withValues(alpha: 0.2),
                             width: 1,
                           ),
                         ),
@@ -381,12 +396,12 @@ class _SearchScreenState extends State<SearchScreen> {
                             Icon(
                               Icons.trending_up,
                               size: 16,
-                              color: const Color(0xFFEFEDE3).withValues(alpha: 0.6),
+                              color: ThemeManager.instance.textColor.withValues(alpha: 0.6),
                             ),
                             const SizedBox(width: 8),
                             Text(
                               query,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: Color(0xFFEFEDE3),
                                 fontSize: 14,
                               ),
@@ -411,7 +426,7 @@ class _SearchScreenState extends State<SearchScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Обзор по жанрам',
                   style: TextStyle(
                     fontSize: 20,
@@ -454,13 +469,13 @@ class _SearchScreenState extends State<SearchScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFFEFEDE3)
-              : const Color(0xFF1C1C1C),
+              ? ThemeManager.instance.textColor
+              : ThemeManager.instance.secondaryBackgroundColor,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
-                ? const Color(0xFFEFEDE3)
-                : const Color(0xFFEFEDE3).withValues(alpha: 0.2),
+                ? ThemeManager.instance.textColor
+                : ThemeManager.instance.textColor.withValues(alpha: 0.2),
             width: 1,
           ),
         ),
@@ -468,8 +483,8 @@ class _SearchScreenState extends State<SearchScreen> {
           label,
           style: TextStyle(
             color: isSelected
-                ? const Color(0xFF171716)
-                : const Color(0xFFEFEDE3),
+                ? ThemeManager.instance.backgroundColor
+                : ThemeManager.instance.textColor,
             fontSize: 14,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
           ),
@@ -484,7 +499,7 @@ class _SearchScreenState extends State<SearchScreen> {
         color: const Color(0xFF4A4743),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: const Color(0xFFEFEDE3).withValues(alpha: 0.3),
+          color: ThemeManager.instance.textColor.withValues(alpha: 0.3),
           width: 2,
         ),
       ),
@@ -507,7 +522,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       child: Icon(
                         Icons.music_note,
                         size: 48,
-                        color: const Color(0xFFEFEDE3).withValues(alpha: 0.3),
+                        color: ThemeManager.instance.textColor.withValues(alpha: 0.3),
                       ),
                     );
                   },
@@ -540,7 +555,7 @@ class _SearchScreenState extends State<SearchScreen> {
             bottom: 12,
             child: Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFFEFEDE3),
@@ -563,13 +578,13 @@ class _SearchScreenState extends State<SearchScreen> {
             Icon(
               Icons.search_off,
               size: 64,
-              color: const Color(0xFFEFEDE3).withValues(alpha: 0.3),
+              color: ThemeManager.instance.textColor.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 16),
             Text(
               'Ничего не найдено',
               style: TextStyle(
-                color: const Color(0xFFEFEDE3).withValues(alpha: 0.6),
+                color: ThemeManager.instance.textColor.withValues(alpha: 0.6),
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
@@ -578,7 +593,7 @@ class _SearchScreenState extends State<SearchScreen> {
             Text(
               'Попробуйте другой запрос',
               style: TextStyle(
-                color: const Color(0xFFEFEDE3).withValues(alpha: 0.5),
+                color: ThemeManager.instance.textColor.withValues(alpha: 0.5),
                 fontSize: 14,
               ),
             ),
@@ -593,7 +608,7 @@ class _SearchScreenState extends State<SearchScreen> {
         Text(
           'Результаты поиска "${_searchController.text}"',
           style: TextStyle(
-            color: const Color(0xFFEFEDE3).withValues(alpha: 0.6),
+            color: ThemeManager.instance.textColor.withValues(alpha: 0.6),
             fontSize: 14,
           ),
         ),
@@ -621,15 +636,15 @@ class _SearchScreenState extends State<SearchScreen> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: const Color(0xFFEFEDE3).withValues(alpha: 0.2),
+            color: ThemeManager.instance.textColor.withValues(alpha: 0.2),
             width: 1,
           ),
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(7),
           child: Container(
-            color: const Color(0xFF2A2A28),
-            child: const Icon(
+            color: ThemeManager.instance.secondaryBackgroundColor,
+            child: Icon(
               Icons.music_note,
               color: Color(0xFFEFEDE3),
               size: 28,
@@ -639,7 +654,7 @@ class _SearchScreenState extends State<SearchScreen> {
       ),
       title: Text(
         song['title'] as String,
-        style: const TextStyle(
+        style: TextStyle(
           color: Color(0xFFEFEDE3),
           fontSize: 16,
           fontWeight: FontWeight.w600,
@@ -648,34 +663,50 @@ class _SearchScreenState extends State<SearchScreen> {
       subtitle: Text(
         song['artist'] as String,
         style: TextStyle(
-          color: const Color(0xFFEFEDE3).withValues(alpha: 0.6),
+          color: ThemeManager.instance.textColor.withValues(alpha: 0.6),
           fontSize: 14,
         ),
       ),
       trailing: IconButton(
-        icon: const Icon(Icons.play_arrow, color: Color(0xFFEFEDE3)),
+        icon: Icon(Icons.play_arrow, color: Color(0xFFEFEDE3)),
         onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => PlayerScreen(
-                songTitle: song['title'] as String,
-                artist: song['artist'] as String,
-                coverPath: 'assets/vinyl1.png',
-              ),
-            ),
+          final track = _findTrack(
+            song['title'] as String,
+            song['artist'] as String,
           );
+          if (track != null) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => PlayerScreen(track: track),
+              ),
+            );
+          } else if (_musicService.tracks.isNotEmpty) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => PlayerScreen(track: _musicService.tracks.first),
+              ),
+            );
+          }
         },
       ),
       onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => PlayerScreen(
-              songTitle: song['title'] as String,
-              artist: song['artist'] as String,
-              coverPath: 'assets/vinyl1.png',
-            ),
-          ),
+        final track = _findTrack(
+          song['title'] as String,
+          song['artist'] as String,
         );
+        if (track != null) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => PlayerScreen(track: track),
+            ),
+          );
+        } else if (_musicService.tracks.isNotEmpty) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => PlayerScreen(track: _musicService.tracks.first),
+            ),
+          );
+        }
       },
     );
   }
@@ -689,7 +720,7 @@ class _SearchScreenState extends State<SearchScreen> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
-            color: const Color(0xFFEFEDE3).withValues(alpha: 0.2),
+            color: ThemeManager.instance.textColor.withValues(alpha: 0.2),
             width: 1,
           ),
         ),
@@ -699,8 +730,8 @@ class _SearchScreenState extends State<SearchScreen> {
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) {
               return Container(
-                color: const Color(0xFF2A2A28),
-                child: const Icon(
+                color: ThemeManager.instance.secondaryBackgroundColor,
+                child: Icon(
                   Icons.person,
                   color: Color(0xFFEFEDE3),
                   size: 28,
@@ -712,7 +743,7 @@ class _SearchScreenState extends State<SearchScreen> {
       ),
       title: Text(
         artist['name'] as String,
-        style: const TextStyle(
+        style: TextStyle(
           color: Color(0xFFEFEDE3),
           fontSize: 16,
           fontWeight: FontWeight.w600,
@@ -721,11 +752,11 @@ class _SearchScreenState extends State<SearchScreen> {
       subtitle: Text(
         '${artist['listeners']} слушателей в месяц',
         style: TextStyle(
-          color: const Color(0xFFEFEDE3).withValues(alpha: 0.6),
+          color: ThemeManager.instance.textColor.withValues(alpha: 0.6),
           fontSize: 14,
         ),
       ),
-      trailing: const Icon(Icons.chevron_right, color: Color(0xFFEFEDE3)),
+      trailing: Icon(Icons.chevron_right, color: Color(0xFFEFEDE3)),
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
@@ -749,7 +780,7 @@ class _SearchScreenState extends State<SearchScreen> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: const Color(0xFFEFEDE3).withValues(alpha: 0.2),
+            color: ThemeManager.instance.textColor.withValues(alpha: 0.2),
             width: 1,
           ),
         ),
@@ -760,8 +791,8 @@ class _SearchScreenState extends State<SearchScreen> {
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) {
               return Container(
-                color: const Color(0xFF2A2A28),
-                child: const Icon(
+                color: ThemeManager.instance.secondaryBackgroundColor,
+                child: Icon(
                   Icons.playlist_play,
                   color: Color(0xFFEFEDE3),
                   size: 28,
@@ -773,7 +804,7 @@ class _SearchScreenState extends State<SearchScreen> {
       ),
       title: Text(
         playlist['title'] as String,
-        style: const TextStyle(
+        style: TextStyle(
           color: Color(0xFFEFEDE3),
           fontSize: 16,
           fontWeight: FontWeight.w600,
@@ -782,11 +813,11 @@ class _SearchScreenState extends State<SearchScreen> {
       subtitle: Text(
         playlist['description'] as String,
         style: TextStyle(
-          color: const Color(0xFFEFEDE3).withValues(alpha: 0.6),
+          color: ThemeManager.instance.textColor.withValues(alpha: 0.6),
           fontSize: 14,
         ),
       ),
-      trailing: const Icon(Icons.chevron_right, color: Color(0xFFEFEDE3)),
+      trailing: Icon(Icons.chevron_right, color: Color(0xFFEFEDE3)),
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
@@ -803,4 +834,3 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
 }
-

@@ -1,6 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'theme_manager.dart';
 import 'player_screen.dart';
+import 'music_service.dart';
+import 'track_model.dart';
 
 class PlaylistScreen extends StatelessWidget {
   final String title;
@@ -10,7 +13,6 @@ class PlaylistScreen extends StatelessWidget {
   final bool isFromGallery;
   final String? backgroundImagePath;
   final bool isBackgroundFromGallery;
-
   const PlaylistScreen({
     super.key,
     required this.title,
@@ -21,6 +23,18 @@ class PlaylistScreen extends StatelessWidget {
     this.backgroundImagePath,
     this.isBackgroundFromGallery = false,
   });
+  
+  /// Поиск трека по названию и артисту
+  static Track? _findTrack(String title, String artist) {
+    final musicService = MusicService();
+    try {
+      return musicService.tracks.firstWhere(
+        (t) => t.title == title && t.artist == artist,
+      );
+    } catch (e) {
+      return null;
+    }
+  }
 
   void _showFullImage(BuildContext context) {
     showDialog(
@@ -43,8 +57,8 @@ class PlaylistScreen extends StatelessWidget {
                       fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
-                          color: const Color(0xFF2A2A28),
-                          child: const Icon(
+                          color: ThemeManager.instance.secondaryBackgroundColor,
+                          child: Icon(
                             Icons.album,
                             size: 120,
                             color: Colors.white54,
@@ -57,8 +71,8 @@ class PlaylistScreen extends StatelessWidget {
                       fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
-                          color: const Color(0xFF2A2A28),
-                          child: const Icon(
+                          color: ThemeManager.instance.secondaryBackgroundColor,
+                          child: Icon(
                             Icons.album,
                             size: 120,
                             color: Colors.white54,
@@ -76,7 +90,7 @@ class PlaylistScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF171716),
+      backgroundColor: ThemeManager.instance.backgroundColor,
       body: Stack(
         children: [
           // Фон плейлиста на весь экран
@@ -107,18 +121,18 @@ class PlaylistScreen extends StatelessWidget {
             pinned: true,
             backgroundColor: backgroundImagePath != null
                 ? Colors.transparent
-                : const Color(0xFF171716),
+                : ThemeManager.instance.backgroundColor,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios, color: Color(0xFFEFEDE3)),
+              icon: Icon(Icons.arrow_back_ios, color: Color(0xFFEFEDE3)),
               onPressed: () => Navigator.of(context).pop(),
             ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.search, color: Color(0xFFEFEDE3)),
+                icon: Icon(Icons.search, color: Color(0xFFEFEDE3)),
                 onPressed: () {},
               ),
               IconButton(
-                icon: const Icon(Icons.more_vert, color: Color(0xFFEFEDE3)),
+                icon: Icon(Icons.more_vert, color: Color(0xFFEFEDE3)),
                 onPressed: () {},
               ),
             ],
@@ -169,8 +183,8 @@ class PlaylistScreen extends StatelessWidget {
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) {
                                     return Container(
-                                      color: const Color(0xFF2A2A28),
-                                      child: const Icon(
+                                      color: ThemeManager.instance.secondaryBackgroundColor,
+                                      child: Icon(
                                         Icons.album,
                                         size: 80,
                                         color: Colors.white54,
@@ -183,8 +197,8 @@ class PlaylistScreen extends StatelessWidget {
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) {
                                     return Container(
-                                      color: const Color(0xFF2A2A28),
-                                      child: const Icon(
+                                      color: ThemeManager.instance.secondaryBackgroundColor,
+                                      child: Icon(
                                         Icons.album,
                                         size: 80,
                                         color: Colors.white54,
@@ -202,7 +216,7 @@ class PlaylistScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFFEFEDE3),
@@ -241,7 +255,7 @@ class PlaylistScreen extends StatelessWidget {
                     description,
                     style: TextStyle(
                       fontSize: 14,
-                      color: const Color(0xFFEFEDE3).withValues(alpha: 0.7),
+                      color: ThemeManager.instance.textColor.withValues(alpha: 0.7),
                     ),
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
@@ -255,7 +269,7 @@ class PlaylistScreen extends StatelessWidget {
                     '$songCount треков',
                     style: TextStyle(
                       fontSize: 13,
-                      color: const Color(0xFFEFEDE3).withValues(alpha: 0.5),
+                      color: ThemeManager.instance.textColor.withValues(alpha: 0.5),
                     ),
                   ),
                 ),
@@ -269,8 +283,8 @@ class PlaylistScreen extends StatelessWidget {
                       Expanded(
                         child: ElevatedButton.icon(
                           onPressed: () {},
-                          icon: const Icon(Icons.play_arrow, size: 28),
-                          label: const Text(
+                          icon: Icon(Icons.play_arrow, size: 28),
+                          label: Text(
                             'Слушать',
                             style: TextStyle(
                               fontSize: 16,
@@ -278,8 +292,8 @@ class PlaylistScreen extends StatelessWidget {
                             ),
                           ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFEFEDE3),
-                            foregroundColor: const Color(0xFF171716),
+                            backgroundColor: ThemeManager.instance.textColor,
+                            foregroundColor: ThemeManager.instance.backgroundColor,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(24),
@@ -293,13 +307,13 @@ class PlaylistScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: const Color(0xFFEFEDE3).withValues(alpha: 0.3),
+                            color: ThemeManager.instance.textColor.withValues(alpha: 0.3),
                             width: 2,
                           ),
                         ),
                         child: IconButton(
                           onPressed: () {},
-                          icon: const Icon(Icons.shuffle, color: Color(0xFFEFEDE3)),
+                          icon: Icon(Icons.shuffle, color: Color(0xFFEFEDE3)),
                           iconSize: 24,
                         ),
                       ),
@@ -309,13 +323,13 @@ class PlaylistScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: const Color(0xFFEFEDE3).withValues(alpha: 0.3),
+                            color: ThemeManager.instance.textColor.withValues(alpha: 0.3),
                             width: 2,
                           ),
                         ),
                         child: IconButton(
                           onPressed: () {},
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.favorite_border,
                             color: Color(0xFFEFEDE3),
                           ),
@@ -373,15 +387,23 @@ class PlaylistScreen extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => PlayerScreen(
-                songTitle: title,
-                artist: artist,
-                coverPath: imagePath,
-              ),
-            ),
-          );
+                  final track = _findTrack(title, artist);
+                  if (track != null) {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => PlayerScreen(track: track),
+                      ),
+                    );
+                  } else {
+                    final musicService = MusicService();
+                    if (musicService.tracks.isNotEmpty) {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => PlayerScreen(track: musicService.tracks.first),
+                        ),
+                      );
+                    }
+                  }
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -394,7 +416,7 @@ class PlaylistScreen extends StatelessWidget {
                   '$index',
                   style: TextStyle(
                     fontSize: 14,
-                    color: const Color(0xFFEFEDE3).withValues(alpha: 0.5),
+                    color: ThemeManager.instance.textColor.withValues(alpha: 0.5),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -414,8 +436,8 @@ class PlaylistScreen extends StatelessWidget {
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
-                        color: const Color(0xFF2A2A28),
-                        child: const Icon(
+                        color: ThemeManager.instance.secondaryBackgroundColor,
+                        child: Icon(
                           Icons.music_note,
                           size: 24,
                           color: Colors.white54,
@@ -433,7 +455,7 @@ class PlaylistScreen extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
                         color: Color(0xFFEFEDE3),
@@ -446,7 +468,7 @@ class PlaylistScreen extends StatelessWidget {
                       artist,
                       style: TextStyle(
                         fontSize: 13,
-                        color: const Color(0xFFEFEDE3).withValues(alpha: 0.6),
+                        color: ThemeManager.instance.textColor.withValues(alpha: 0.6),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -460,7 +482,7 @@ class PlaylistScreen extends StatelessWidget {
                 duration,
                 style: TextStyle(
                   fontSize: 13,
-                  color: const Color(0xFFEFEDE3).withValues(alpha: 0.5),
+                  color: ThemeManager.instance.textColor.withValues(alpha: 0.5),
                 ),
               ),
               const SizedBox(width: 8),
@@ -469,7 +491,7 @@ class PlaylistScreen extends StatelessWidget {
                 onPressed: () {},
                 icon: Icon(
                   Icons.more_vert,
-                  color: const Color(0xFFEFEDE3).withValues(alpha: 0.5),
+                  color: ThemeManager.instance.textColor.withValues(alpha: 0.5),
                   size: 20,
                 ),
                 padding: EdgeInsets.zero,
@@ -482,4 +504,3 @@ class PlaylistScreen extends StatelessWidget {
     );
   }
 }
-

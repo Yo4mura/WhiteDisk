@@ -79,7 +79,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                     ),
                     child: ClipOval(
                       child: Image.asset(
-                        'assets/vinyl1.png',
+                        'assets/31fed70fb44cf684397169b327cab9d5.jpg',
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           return Container(color: const Color(0xFF3D3C38));
@@ -156,7 +156,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                           ClipRRect(
                             borderRadius: BorderRadius.circular(12),
                             child: Image.asset(
-                              'assets/vinyl2.png',
+                              'assets/41dc8e4e6ceab592fbb46b5e3f545dac.jpg',
                               fit: BoxFit.cover,
                               width: double.infinity,
                               errorBuilder: (context, error, stackTrace) {

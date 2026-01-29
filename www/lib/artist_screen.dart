@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'theme_manager.dart';
 import 'player_screen.dart';
+import 'music_service.dart';
+import 'track_model.dart';
 import 'playlist_screen.dart';
 
 class ArtistScreen extends StatefulWidget {
@@ -25,6 +28,18 @@ class ArtistScreen extends StatefulWidget {
 }
 
 class _ArtistScreenState extends State<ArtistScreen> {
+  final MusicService _musicService = MusicService();
+  
+  /// Поиск трека по названию и артисту
+  Track? _findTrack(String title, String artist) {
+    try {
+      return _musicService.tracks.firstWhere(
+        (t) => t.title == title && t.artist == artist,
+      );
+    } catch (e) {
+      return null;
+    }
+  }
   bool _isFollowing = false;
 
   String _formatNumber(int number) {
@@ -54,7 +69,7 @@ class _ArtistScreenState extends State<ArtistScreen> {
                 padding: const EdgeInsets.only(bottom: 16),
                 child: Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFFEFEDE3),
@@ -75,8 +90,8 @@ class _ArtistScreenState extends State<ArtistScreen> {
                     fit: BoxFit.contain,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
-                        color: const Color(0xFF2A2A28),
-                        child: const Icon(
+                        color: ThemeManager.instance.secondaryBackgroundColor,
+                        child: Icon(
                           Icons.broken_image,
                           size: 120,
                           color: Colors.white54,
@@ -107,21 +122,21 @@ class _ArtistScreenState extends State<ArtistScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF171716),
+      backgroundColor: ThemeManager.instance.backgroundColor,
       body: CustomScrollView(
         slivers: [
           // App bar with banner
           SliverAppBar(
             expandedHeight: 320,
             pinned: true,
-            backgroundColor: const Color(0xFF171716),
+            backgroundColor: ThemeManager.instance.backgroundColor,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios, color: Color(0xFFEFEDE3)),
+              icon: Icon(Icons.arrow_back_ios, color: Color(0xFFEFEDE3)),
               onPressed: () => Navigator.of(context).pop(),
             ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.more_vert, color: Color(0xFFEFEDE3)),
+                icon: Icon(Icons.more_vert, color: Color(0xFFEFEDE3)),
                 onPressed: () {},
               ),
             ],
@@ -142,8 +157,8 @@ class _ArtistScreenState extends State<ArtistScreen> {
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            const Color(0xFF2A2A28),
-                            const Color(0xFF171716),
+                            ThemeManager.instance.secondaryBackgroundColor,
+                            ThemeManager.instance.backgroundColor,
                           ],
                         ),
                       ),
@@ -166,8 +181,8 @@ class _ArtistScreenState extends State<ArtistScreen> {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          const Color(0xFF171716).withValues(alpha: 0.7),
-                          const Color(0xFF171716),
+                          ThemeManager.instance.backgroundColor.withValues(alpha: 0.7),
+                          ThemeManager.instance.backgroundColor,
                         ],
                         stops: const [0.0, 0.7, 1.0],
                       ),
@@ -198,7 +213,7 @@ class _ArtistScreenState extends State<ArtistScreen> {
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   border: Border.all(
-                                    color: const Color(0xFFEFEDE3),
+                                    color: ThemeManager.instance.textColor,
                                     width: 4,
                                   ),
                                   boxShadow: [
@@ -215,8 +230,8 @@ class _ArtistScreenState extends State<ArtistScreen> {
                                     fit: BoxFit.cover,
                                     errorBuilder: (context, error, stackTrace) {
                                       return Container(
-                                        color: const Color(0xFF3D3C38),
-                                        child: const Icon(
+                                        color: ThemeManager.instance.secondaryBackgroundColor,
+                                        child: Icon(
                                           Icons.person,
                                           size: 60,
                                           color: Colors.white54,
@@ -232,7 +247,7 @@ class _ArtistScreenState extends State<ArtistScreen> {
                           // Artist name
                           Text(
                             widget.artistName,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 36,
                               fontWeight: FontWeight.w900,
                               color: Color(0xFFEFEDE3),
@@ -245,7 +260,7 @@ class _ArtistScreenState extends State<ArtistScreen> {
                             '${_formatNumber(widget.monthlyListeners)} слушателей в месяц',
                             style: TextStyle(
                               fontSize: 14,
-                              color: const Color(0xFFEFEDE3).withValues(alpha: 0.7),
+                              color: ThemeManager.instance.textColor.withValues(alpha: 0.7),
                             ),
                           ),
                         ],
@@ -272,7 +287,7 @@ class _ArtistScreenState extends State<ArtistScreen> {
                         width: 56,
                         height: 56,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFEFEDE3),
+                          color: ThemeManager.instance.textColor,
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
@@ -284,7 +299,7 @@ class _ArtistScreenState extends State<ArtistScreen> {
                         ),
                         child: IconButton(
                           onPressed: () {},
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.play_arrow,
                             color: Color(0xFF171716),
                             size: 32,
@@ -300,13 +315,13 @@ class _ArtistScreenState extends State<ArtistScreen> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: const Color(0xFFEFEDE3).withValues(alpha: 0.3),
+                            color: ThemeManager.instance.textColor.withValues(alpha: 0.3),
                             width: 2,
                           ),
                         ),
                         child: IconButton(
                           onPressed: () {},
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.shuffle,
                             color: Color(0xFFEFEDE3),
                             size: 24,
@@ -325,10 +340,10 @@ class _ArtistScreenState extends State<ArtistScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _isFollowing
                               ? Colors.transparent
-                              : const Color(0xFFEFEDE3),
+                              : ThemeManager.instance.textColor,
                           foregroundColor: _isFollowing
-                              ? const Color(0xFFEFEDE3)
-                              : const Color(0xFF171716),
+                              ? ThemeManager.instance.textColor
+                              : ThemeManager.instance.backgroundColor,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 32,
                             vertical: 14,
@@ -337,7 +352,7 @@ class _ArtistScreenState extends State<ArtistScreen> {
                             borderRadius: BorderRadius.circular(24),
                             side: BorderSide(
                               color: _isFollowing
-                                  ? const Color(0xFFEFEDE3)
+                                  ? ThemeManager.instance.textColor
                                   : Colors.transparent,
                               width: 2,
                             ),
@@ -346,7 +361,7 @@ class _ArtistScreenState extends State<ArtistScreen> {
                         ),
                         child: Text(
                           _isFollowing ? 'Подписан' : 'Подписаться',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
                           ),
@@ -364,7 +379,7 @@ class _ArtistScreenState extends State<ArtistScreen> {
                       widget.bio!,
                       style: TextStyle(
                         fontSize: 14,
-                        color: const Color(0xFFEFEDE3).withValues(alpha: 0.7),
+                        color: ThemeManager.instance.textColor.withValues(alpha: 0.7),
                         height: 1.5,
                       ),
                     ),
@@ -426,7 +441,7 @@ class _ArtistScreenState extends State<ArtistScreen> {
                           context,
                           title: 'Альбом ${index + 1}',
                           year: '${2024 - index}',
-                          imagePath: 'assets/vinyl${(index % 5) + 1}.png',
+                          imagePath: 'assets/vinyl2.png',
                         ),
                       );
                     },
@@ -459,7 +474,7 @@ class _ArtistScreenState extends State<ArtistScreen> {
                           context,
                           title: 'Сингл ${index + 1}',
                           year: '2024',
-                          imagePath: 'assets/vinyl${(index % 5) + 1}.png',
+                          imagePath: 'assets/vinyl3.png',
                           isSingle: true,
                         ),
                       );
@@ -485,15 +500,20 @@ class _ArtistScreenState extends State<ArtistScreen> {
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => PlayerScreen(
-                songTitle: title,
-                artist: widget.artistName,
-                coverPath: widget.avatarPath ?? 'assets/vinyl1.png',
-              ),
-            ),
-          );
+                  final track = _findTrack(title, widget.artistName);
+                  if (track != null) {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => PlayerScreen(track: track),
+                      ),
+                    );
+                  } else if (_musicService.tracks.isNotEmpty) {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => PlayerScreen(track: _musicService.tracks.first),
+                      ),
+                    );
+                  }
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
@@ -507,7 +527,7 @@ class _ArtistScreenState extends State<ArtistScreen> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFFEFEDE3).withValues(alpha: 0.6),
+                    color: ThemeManager.instance.textColor.withValues(alpha: 0.6),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -520,19 +540,19 @@ class _ArtistScreenState extends State<ArtistScreen> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(
-                    color: const Color(0xFFEFEDE3).withValues(alpha: 0.2),
+                    color: ThemeManager.instance.textColor.withValues(alpha: 0.2),
                     width: 1,
                   ),
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(5),
                   child: Image.asset(
-                    widget.avatarPath ?? 'assets/vinyl${(index % 5) + 1}.png',
+                    widget.avatarPath ?? 'assets/vinyl4.png',
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
-                        color: const Color(0xFF2A2A28),
-                        child: const Icon(
+                        color: ThemeManager.instance.secondaryBackgroundColor,
+                        child: Icon(
                           Icons.music_note,
                           size: 24,
                           color: Colors.white54,
@@ -550,7 +570,7 @@ class _ArtistScreenState extends State<ArtistScreen> {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
                         color: Color(0xFFEFEDE3),
@@ -563,7 +583,7 @@ class _ArtistScreenState extends State<ArtistScreen> {
                       '${_formatNumber(plays)} прослушиваний',
                       style: TextStyle(
                         fontSize: 13,
-                        color: const Color(0xFFEFEDE3).withValues(alpha: 0.5),
+                        color: ThemeManager.instance.textColor.withValues(alpha: 0.5),
                       ),
                     ),
                   ],
@@ -575,7 +595,7 @@ class _ArtistScreenState extends State<ArtistScreen> {
                 onPressed: () {},
                 icon: Icon(
                   Icons.more_vert,
-                  color: const Color(0xFFEFEDE3).withValues(alpha: 0.5),
+                  color: ThemeManager.instance.textColor.withValues(alpha: 0.5),
                   size: 20,
                 ),
                 padding: EdgeInsets.zero,
@@ -620,7 +640,7 @@ class _ArtistScreenState extends State<ArtistScreen> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: const Color(0xFFEFEDE3),
+                  color: ThemeManager.instance.textColor,
                   width: 2,
                 ),
                 boxShadow: [
@@ -638,8 +658,8 @@ class _ArtistScreenState extends State<ArtistScreen> {
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
-                      color: const Color(0xFF2A2A28),
-                      child: const Icon(
+                      color: ThemeManager.instance.secondaryBackgroundColor,
+                      child: Icon(
                         Icons.album,
                         size: 60,
                         color: Colors.white54,
@@ -653,7 +673,7 @@ class _ArtistScreenState extends State<ArtistScreen> {
             // Title
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: Color(0xFFEFEDE3),
@@ -667,7 +687,7 @@ class _ArtistScreenState extends State<ArtistScreen> {
               '$year${isSingle ? " • Сингл" : ""}',
               style: TextStyle(
                 fontSize: 12,
-                color: const Color(0xFFEFEDE3).withValues(alpha: 0.6),
+                color: ThemeManager.instance.textColor.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -676,4 +696,3 @@ class _ArtistScreenState extends State<ArtistScreen> {
     );
   }
 }
-

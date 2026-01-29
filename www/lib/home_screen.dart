@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
-import 'profile_screen.dart';
+
+import 'home_widgets.dart';
+import 'theme_manager.dart';
 import 'library_screen.dart';
-import 'search_screen.dart';
+import 'music_service.dart';
 import 'player_screen.dart';
 import 'playlist_screen.dart';
-import 'artist_screen.dart';
-import 'widget_creator_screen.dart';
+import 'profile_screen.dart';
+import 'search_screen.dart';
+import 'track_model.dart';
 
 // ==================== HOME SCREEN ====================
 class HomeScreen extends StatefulWidget {
@@ -18,18 +20,29 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
-  List<Map<String, dynamic>> _createdWidgets = [];
+  final MusicService _musicService = MusicService();
   
   // Состояние мини-плеера (имитация)
   bool _isPlaying = false;
   String _currentTrack = 'Tokyo Drift';
   String _currentArtist = 'Yoshimura';
-  String _currentCover = 'assets/vinyl2.png';
+  String _currentCover = 'assets/vinyl5.png';
+  
+  /// Поиск трека по названию и артисту
+  Track? _findTrack(String title, String artist) {
+    try {
+      return _musicService.tracks.firstWhere(
+        (t) => t.title == title && t.artist == artist,
+      );
+    } catch (e) {
+      return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF171716),
+      backgroundColor: ThemeManager.instance.backgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -71,18 +84,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                 horizontal: 16,
                               ),
                               children: [
-                                _buildFeaturedCard(
+                                const FeaturedPlaylistCard(
                                   title: 'Best Of Year',
                                   description:
                                       'Топ-музыка года — от проверенных хитов до неожиданных открытий. Всегда свежие треки на вашей главной странице',
-                                  imagePath: 'assets/vinyl1.png',
+                                  imagePath: 'assets/31fed70fb44cf684397169b327cab9d5.jpg',
                                 ),
                                 const SizedBox(width: 12),
-                                _buildFeaturedCard(
+                                const FeaturedPlaylistCard(
                                   title: 'Лучшие исполнители за се...',
                                   description:
                                       'Топ-исполнители текущего сезона — самые популярные треки последних месяцев.',
-                                  imagePath: 'assets/vinyl2.png',
+                                  imagePath: 'assets/41dc8e4e6ceab592fbb46b5e3f545dac.jpg',
                                 ),
                               ],
                             ),
@@ -125,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             8,
                                           ),
                                           border: Border.all(
-                                            color: const Color(0xFFEFEDE3),
+                                            color: ThemeManager.instance.textColor,
                                             width: 2,
                                           ),
                                         ),
@@ -134,7 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             6,
                                           ),
                                           child: Image.asset(
-                                            'assets/vinyl1.png',
+                                            'assets/4db574e2cee0e13f00f9351a356fc21d.jpg',
                                             fit: BoxFit.cover,
                                             errorBuilder:
                                                 (context, error, stackTrace) {
@@ -142,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     color: const Color(
                                                       0xFF3D3C38,
                                                     ),
-                                                    child: const Icon(
+                                                    child: Icon(
                                                       Icons.music_note,
                                                       color: Colors.white54,
                                                       size: 24,
@@ -160,13 +173,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                           children: [
                                             Row(
                                               children: [
-                                                const Icon(
+                                                Icon(
                                                   Icons.music_note,
                                                   size: 14,
                                                   color: Color(0xFFB8B6B0),
                                                 ),
                                                 const SizedBox(width: 4),
-                                                const Text(
+                                                Text(
                                                   'Сейчас слушаю',
                                                   style: TextStyle(
                                                     fontSize: 12,
@@ -178,7 +191,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             const SizedBox(height: 4),
                                             Text(
                                               'Mad Boy (feat. ALKUN)',
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 fontSize: 15,
                                                 fontWeight: FontWeight.w600,
                                                 color: Color(0xFFEFEDE3),
@@ -257,7 +270,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                               ),
                                               child: ClipOval(
                                                 child: Image.asset(
-                                                  'assets/vinyl2.png',
+                                                  'assets/746327ec1c669b09f965de5d195198e8.jpg',
                                                   fit: BoxFit.cover,
                                                 ),
                                               ),
@@ -278,7 +291,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 ),
                                                 child: ClipOval(
                                                   child: Image.asset(
-                                                    'assets/vinyl3.png',
+                                                    'assets/8c5e2c48628416f0b7464f79596ec0df.jpg',
                                                     fit: BoxFit.cover,
                                                   ),
                                                 ),
@@ -300,7 +313,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 ),
                                                 child: ClipOval(
                                                   child: Image.asset(
-                                                    'assets/vinyl4.png',
+                                                    'assets/9a7871b01076799c9d4d95fec3d14e06.jpg',
                                                     fit: BoxFit.cover,
                                                   ),
                                                 ),
@@ -329,7 +342,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                         ),
                                                   ),
                                                   const SizedBox(width: 6),
-                                                  const Text(
+                                                  Text(
                                                     '5 друзей сейчас онлайн',
                                                     style: TextStyle(
                                                       fontSize: 13,
@@ -367,13 +380,13 @@ class _HomeScreenState extends State<HomeScreen> {
                             padding: EdgeInsets.symmetric(horizontal: 16),
                             child: Row(
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.queue_music,
                                   size: 24,
                                   color: Color(0xFFEFEDE3),
                                 ),
                                 const SizedBox(width: 8),
-                                const Text(
+                                Text(
                                   'Daily Mix для тебя',
                                   style: TextStyle(
                                     fontSize: 24,
@@ -394,12 +407,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                 horizontal: 16,
                               ),
                               children: [
-                                _buildDailyMixCard(
-                                  context,
+                                const DailyMixCard(
                                   mixNumber: 1,
                                   title: 'Daily Mix 1',
                                   subtitle: 'ALKUN, Yoshimura и другие',
-                                  imagePath: 'assets/vinyl1.png',
+                                  imagePath: 'assets/b64ab0d02093bf822f74375c79e24e23.jpg',
                                   gradient: const LinearGradient(
                                     colors: [
                                       Color(0xFF667EEA),
@@ -408,12 +420,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 ),
                                 const SizedBox(width: 12),
-                                _buildDailyMixCard(
-                                  context,
+                                const DailyMixCard(
                                   mixNumber: 2,
                                   title: 'Daily Mix 2',
                                   subtitle: 'shibob, CUPSIZE и другие',
-                                  imagePath: 'assets/vinyl2.png',
+                                  imagePath: 'assets/b8be167d06c4a74174af808843cb9db4.jpg',
                                   gradient: const LinearGradient(
                                     colors: [
                                       Color(0xFFFF6B9D),
@@ -422,12 +433,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 ),
                                 const SizedBox(width: 12),
-                                _buildDailyMixCard(
-                                  context,
+                                const DailyMixCard(
                                   mixNumber: 3,
                                   title: 'Daily Mix 3',
                                   subtitle: 'Твой чилл',
-                                  imagePath: 'assets/vinyl3.png',
+                                  imagePath: 'assets/cdf42b8bf42351fdf0aed76a1efa1a4d.jpg',
                                   gradient: const LinearGradient(
                                     colors: [
                                       Color(0xFF56CCF2),
@@ -436,12 +446,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 ),
                                 const SizedBox(width: 12),
-                                _buildDailyMixCard(
-                                  context,
+                                const DailyMixCard(
                                   mixNumber: 4,
                                   title: 'Daily Mix 4',
                                   subtitle: 'Энергия и драйв',
-                                  imagePath: 'assets/vinyl4.png',
+                                  imagePath: 'assets/dada9e612a304c6228f597fb30f58d31.jpg',
                                   gradient: const LinearGradient(
                                     colors: [
                                       Color(0xFFFF4E50),
@@ -477,25 +486,25 @@ class _HomeScreenState extends State<HomeScreen> {
                                 horizontal: 16,
                               ),
                               children: [
-                                _buildAlbumCard(
+                                const AlbumCard(
                                   title: 'Микс #1',
                                   artist:
                                       'shit, денди, Amorbius, aishi и другие',
-                                  imagePath: 'assets/vinyl3.png',
+                                  imagePath: 'assets/e27ce83b1f94fe83ef3cc161d1d066ae.jpg',
                                 ),
                                 const SizedBox(width: 12),
-                                _buildAlbumCard(
+                                const AlbumCard(
                                   title: 'Микс #1',
                                   artist:
                                       'shit, денди, Amorbius, aishi и другие',
-                                  imagePath: 'assets/vinyl4.png',
+                                  imagePath: 'assets/vinyl1.png',
                                 ),
                                 const SizedBox(width: 12),
-                                _buildAlbumCard(
+                                const AlbumCard(
                                   title: 'Микс #1',
                                   artist:
                                       'shit, денди, Amorbius, aishi и другие',
-                                  imagePath: 'assets/vinyl5.png',
+                                  imagePath: 'assets/vinyl2.png',
                                 ),
                               ],
                             ),
@@ -525,53 +534,46 @@ class _HomeScreenState extends State<HomeScreen> {
                                 horizontal: 16,
                               ),
                               children: [
-                                _buildMoodCard(
-                                  context,
+                                MoodCard(
                                   icon: Icons.sentiment_satisfied_alt,
                                   label: 'Радость',
-                                  color: const Color(0xFF2A2A28),
+                                  color: ThemeManager.instance.secondaryBackgroundColor,
                                 ),
                                 const SizedBox(width: 12),
-                                _buildMoodCard(
-                                  context,
+                                MoodCard(
                                   icon: Icons.sentiment_dissatisfied,
                                   label: 'Грусть',
-                                  color: const Color(0xFF2A2A28),
+                                  color: ThemeManager.instance.secondaryBackgroundColor,
                                 ),
                                 const SizedBox(width: 12),
-                                _buildMoodCard(
-                                  context,
+                                MoodCard(
                                   icon: Icons.fitness_center,
                                   label: 'Мотивация',
-                                  color: const Color(0xFF2A2A28),
+                                  color: ThemeManager.instance.secondaryBackgroundColor,
                                 ),
                                 const SizedBox(width: 12),
-                                _buildMoodCard(
-                                  context,
+                                MoodCard(
                                   icon: Icons.celebration,
                                   label: 'Вечеринка',
-                                  color: const Color(0xFF2A2A28),
+                                  color: ThemeManager.instance.secondaryBackgroundColor,
                                 ),
                                 const SizedBox(width: 12),
-                                _buildMoodCard(
-                                  context,
+                                MoodCard(
                                   icon: Icons.menu_book,
                                   label: 'Учёба',
-                                  color: const Color(0xFF2A2A28),
+                                  color: ThemeManager.instance.secondaryBackgroundColor,
                                 ),
                                 const SizedBox(width: 12),
-                                _buildMoodCard(
-                                  context,
+                                MoodCard(
                                   icon: Icons.bedtime,
                                   label: 'Сон',
-                                  color: const Color(0xFF2A2A28),
+                                  color: ThemeManager.instance.secondaryBackgroundColor,
                                 ),
                                 const SizedBox(width: 12),
-                                _buildMoodCard(
-                                  context,
+                                MoodCard(
                                   icon: Icons.heart_broken,
                                   label: 'Расставание',
-                                  color: const Color(0xFF2A2A28),
+                                  color: ThemeManager.instance.secondaryBackgroundColor,
                                 ),
                               ],
                             ),
@@ -597,10 +599,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: Container(
                               padding: const EdgeInsets.all(20),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF2A2A28),
+                                color: ThemeManager.instance.secondaryBackgroundColor,
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color: const Color(0xFFEFEDE3),
+                                  color: ThemeManager.instance.textColor,
                                   width: 2,
                                 ),
                               ),
@@ -630,7 +632,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Row(
                                     children: [
                                       Expanded(
-                                        child: _buildStatItem(
+                                        child: const StatItem(
                                           icon: Icons.headphones,
                                           value: '12ч 34м',
                                           label: 'Прослушано',
@@ -638,7 +640,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ),
                                       const SizedBox(width: 16),
                                       Expanded(
-                                        child: _buildStatItem(
+                                        child: const StatItem(
                                           icon: Icons.local_fire_department,
                                           value: '7 дней',
                                           label: 'Streak',
@@ -650,7 +652,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Row(
                                     children: [
                                       Expanded(
-                                        child: _buildStatItem(
+                                        child: const StatItem(
                                           icon: Icons.star,
                                           value: 'ALKUN',
                                           label: 'Топ артист',
@@ -658,7 +660,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ),
                                       const SizedBox(width: 16),
                                       Expanded(
-                                        child: _buildStatItem(
+                                        child: const StatItem(
                                           icon: Icons.music_note,
                                           value: '142',
                                           label: 'Треков',
@@ -678,10 +680,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: Container(
                               padding: const EdgeInsets.all(18),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF2A2A28),
+                                color: ThemeManager.instance.secondaryBackgroundColor,
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color: const Color(0xFFEFEDE3),
+                                  color: ThemeManager.instance.textColor,
                                   width: 2,
                                 ),
                               ),
@@ -689,7 +691,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 children: [
                                   Text(
                                     _getTimeOfDayEmoji(),
-                                    style: const TextStyle(fontSize: 48),
+                                    style: TextStyle(fontSize: 48),
                                   ),
                                   const SizedBox(width: 16),
                                   Expanded(
@@ -699,7 +701,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       children: [
                                         Text(
                                           _getTimeOfDayTitle(),
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontSize: 20,
                                             fontWeight: FontWeight.bold,
                                             color: Color(0xFFEFEDE3),
@@ -708,7 +710,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         const SizedBox(height: 4),
                                         Text(
                                           _getTimeOfDaySubtitle(),
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontSize: 13,
                                             color: Color(0xFFEFEDE3),
                                           ),
@@ -724,13 +726,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                             title: _getTimeOfDayTitle(),
                                             description:
                                                 _getTimeOfDaySubtitle(),
-                                            imagePath: 'assets/vinyl1.png',
+                                            imagePath: 'assets/vinyl3.png',
                                             songCount: 30,
                                           ),
                                         ),
                                       );
                                     },
-                                    icon: const Icon(
+                                    icon: Icon(
                                       Icons.play_circle_filled,
                                       color: Colors.white,
                                       size: 42,
@@ -765,24 +767,24 @@ class _HomeScreenState extends State<HomeScreen> {
                                 horizontal: 16,
                               ),
                               children: [
-                                _buildPlaylistCard(
+                                const PlaylistCard(
                                   title: 'Плейлист - Kireko',
-                                  imagePath: 'assets/vinyl1.png',
-                                ),
-                                const SizedBox(width: 12),
-                                _buildPlaylistCard(
-                                  title: 'Плейлист - лллллл',
-                                  imagePath: 'assets/vinyl2.png',
-                                ),
-                                const SizedBox(width: 12),
-                                _buildPlaylistCard(
-                                  title: 'Плейлист',
-                                  imagePath: 'assets/vinyl3.png',
-                                ),
-                                const SizedBox(width: 12),
-                                _buildPlaylistCard(
-                                  title: 'Плейлист',
                                   imagePath: 'assets/vinyl4.png',
+                                ),
+                                const SizedBox(width: 12),
+                                const PlaylistCard(
+                                  title: 'Плейлист - лллллл',
+                                  imagePath: 'assets/vinyl5.png',
+                                ),
+                                const SizedBox(width: 12),
+                                const PlaylistCard(
+                                  title: 'Плейлист',
+                                  imagePath: 'assets/31fed70fb44cf684397169b327cab9d5.jpg',
+                                ),
+                                const SizedBox(width: 12),
+                                const PlaylistCard(
+                                  title: 'Плейлист',
+                                  imagePath: 'assets/41dc8e4e6ceab592fbb46b5e3f545dac.jpg',
                                 ),
                               ],
                             ),
@@ -812,27 +814,27 @@ class _HomeScreenState extends State<HomeScreen> {
                                 horizontal: 16,
                               ),
                               children: [
-                                _buildArtistCard(
+                                const ArtistCard(
                                   artistName: 'ALKUN',
-                                  imagePath: 'assets/vinyl1.png',
+                                  imagePath: 'assets/4db574e2cee0e13f00f9351a356fc21d.jpg',
                                   monthlyListeners: 5420000,
                                 ),
                                 const SizedBox(width: 12),
-                                _buildArtistCard(
+                                const ArtistCard(
                                   artistName: 'Yoshimura',
-                                  imagePath: 'assets/vinyl2.png',
+                                  imagePath: 'assets/746327ec1c669b09f965de5d195198e8.jpg',
                                   monthlyListeners: 3200000,
                                 ),
                                 const SizedBox(width: 12),
-                                _buildArtistCard(
+                                const ArtistCard(
                                   artistName: 'CUPSIZE',
-                                  imagePath: 'assets/vinyl3.png',
+                                  imagePath: 'assets/8c5e2c48628416f0b7464f79596ec0df.jpg',
                                   monthlyListeners: 2850000,
                                 ),
                                 const SizedBox(width: 12),
-                                _buildArtistCard(
+                                const ArtistCard(
                                   artistName: 'shibob',
-                                  imagePath: 'assets/vinyl4.png',
+                                  imagePath: 'assets/9a7871b01076799c9d4d95fec3d14e06.jpg',
                                   monthlyListeners: 1920000,
                                 ),
                               ],
@@ -840,8 +842,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           const SizedBox(height: 32),
 
-                          // 9. Widgets Section
-                          _buildWidgetsSection(context),
                           const SizedBox(height: 100),
                         ],
                       ),
@@ -858,365 +858,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // profile content moved to profile_screen.dart
-
-  Widget _buildFeaturedCard({
-    required String title,
-    required String description,
-    required String imagePath,
-  }) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => PlaylistScreen(
-              title: title,
-              description: description,
-              imagePath: imagePath,
-              songCount: 12,
-            ),
-          ),
-        );
-      },
-      child: Container(
-      width: 280,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFEFEDE3), width: 2),
-      ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: Container(
-            color: const Color(0xFFEFEDE3),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Image
-                Container(
-                  height: 180,
-              width: double.infinity,
-              color: const Color(0xFF1C1C1C),
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: const Color(0xFF1C1C1C),
-                    child: const Icon(
-                      Icons.album,
-                      size: 60,
-                      color: Colors.white54,
-                    ),
-                  );
-                },
-            ),
-          ),
-          // Text content with white background
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                          fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF000000),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                      const SizedBox(height: 3),
-                Text(
-                  description,
-                  style: const TextStyle(
-                          fontSize: 11,
-                    color: Color(0xFF000000),
-                    height: 1.2,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAlbumCard({
-    required String title,
-    required String artist,
-    required String imagePath,
-  }) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => PlaylistScreen(
-              title: title,
-              description: 'Альбом исполнителя $artist',
-              imagePath: imagePath,
-              songCount: 10,
-            ),
-          ),
-        );
-      },
-      child: SizedBox(
-      width: 160,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Album cover with white title background
-          Container(
-            height: 150,
-            width: 160,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFFEFEDE3), width: 2),
-            ),
-            child: Column(
-              children: [
-                // Image part
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(8),
-                    ),
-                    child: Container(
-                      width: double.infinity,
-                      color: const Color(0xFF1C1C1C),
-                      child: Image.asset(
-                        imagePath,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: const Color(0xFF1C1C1C),
-                            child: const Icon(
-                              Icons.album,
-                              size: 60,
-                              color: Colors.white54,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                ),
-                // White title background
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 6,
-                  ),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFEFEDE3),
-                    borderRadius: BorderRadius.vertical(
-                      bottom: Radius.circular(8),
-                    ),
-                  ),
-                  child: Text(
-                    title,
-                    style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                      color: Color(0xFF000000),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                  ),
-                ),
-              ],
-            ),
-          ),
-            const SizedBox(height: 8),
-            // Artist name
-          Text(
-            artist,
-              style: const TextStyle(fontSize: 12, color: Color(0xFFEFEDE3)),
-              maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPlaylistCard({
-    required String title,
-    required String imagePath,
-  }) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => PlaylistScreen(
-              title: title,
-              description: 'Подборка лучших треков',
-              imagePath: imagePath,
-              songCount: 15,
-            ),
-          ),
-        );
-      },
-      child: SizedBox(
-      width: 140,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Playlist cover
-          Container(
-            height: 140,
-            width: 140,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: const Color(0xFF1C1C1C),
-              border: Border.all(color: const Color(0xFFEFEDE3), width: 2),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(7),
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: const Color(0xFF3D3C38),
-                    child: const Icon(
-                      Icons.playlist_play,
-                      size: 60,
-                      color: Colors.white54,
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-            // Playlist title
-          Text(
-            title,
-              style: const TextStyle(
-              fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFFEFEDE3),
-            ),
-              maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildArtistCard({
-    required String artistName,
-    required String imagePath,
-    required int monthlyListeners,
-  }) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => ArtistScreen(
-              artistName: artistName,
-              bio:
-                  'Один из самых популярных артистов современной музыкальной сцены',
-              bannerPath: imagePath,
-              avatarPath: imagePath,
-              monthlyListeners: monthlyListeners,
-              followers: (monthlyListeners * 0.3).toInt(),
-            ),
-          ),
-        );
-      },
-      child: SizedBox(
-        width: 160,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Artist avatar (circle) - slightly larger
-            Container(
-              width: 150,
-              height: 150,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFFEFEDE3), width: 3),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.4),
-                    blurRadius: 20,
-                    spreadRadius: 3,
-                  ),
-                ],
-              ),
-              child: ClipOval(
-                child: Image.asset(
-                  imagePath,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: const Color(0xFF3D3C38),
-                      child: const Icon(
-                        Icons.person,
-                        size: 65,
-                        color: Colors.white54,
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            // Artist name
-            Text(
-              artistName,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFFEFEDE3),
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 4),
-            // Monthly listeners
-            Text(
-              '${_formatNumber(monthlyListeners)} слушателей',
-              style: TextStyle(
-                fontSize: 11,
-                color: const Color(0xFFEFEDE3).withValues(alpha: 0.6),
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _formatNumber(int number) {
-    if (number >= 1000000) {
-      return '${(number / 1000000).toStringAsFixed(1)}M';
-    } else if (number >= 1000) {
-      return '${(number / 1000).toStringAsFixed(1)}K';
-    }
-    return number.toString();
-  }
 
   // Time of day methods
   String _getTimeOfDayEmoji() {
@@ -1245,233 +886,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return 'Медленные треки для спокойной ночи';
   }
 
-  Widget _buildStatItem({
-    required IconData icon,
-    required String value,
-    required String label,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 20, color: Colors.white),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              color: Colors.white.withValues(alpha: 0.8),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDailyMixCard(
-    BuildContext context, {
-    required int mixNumber,
-    required String title,
-    required String subtitle,
-    required String imagePath,
-    required LinearGradient gradient,
-  }) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => PlaylistScreen(
-              title: title,
-              description:
-                  'Плейлист создан специально для тебя • Обновляется каждый день',
-              imagePath: imagePath,
-              songCount: 50,
-            ),
-          ),
-        );
-      },
-      child: Container(
-        width: 180,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.3),
-              blurRadius: 15,
-              spreadRadius: 2,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Cover with gradient overlay
-            Container(
-              height: 140,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFEFEDE3), width: 2),
-              ),
-              child: Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.asset(
-                      imagePath,
-                      width: double.infinity,
-                      height: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: const Color(0xFF2A2A28),
-                          child: const Icon(
-                            Icons.music_note,
-                            size: 60,
-                            color: Colors.white54,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          gradient.colors[0].withValues(alpha: 0.7),
-                        ],
-                      ),
-                    ),
-                  ),
-                  // Mix number
-                  Positioned(
-                    top: 12,
-                    right: 12,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.6),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.3),
-                          width: 1,
-                        ),
-                      ),
-                      child: Text(
-                        'Mix $mixNumber',
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            // Title
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFFEFEDE3),
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(height: 4),
-            // Subtitle
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text(
-                subtitle,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: const Color(0xFFEFEDE3).withValues(alpha: 0.6),
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMoodCard(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required Color color,
-  }) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => PlaylistScreen(
-              title: 'Музыка для настроения: $label',
-              description: 'Подборка треков под твоё настроение',
-              imagePath: 'assets/vinyl1.png',
-              songCount: 25,
-            ),
-          ),
-        );
-      },
-      child: Container(
-        width: 140,
-        height: 100,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFEFEDE3), width: 2),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 36, color: const Color(0xFFEFEDE3)),
-            const SizedBox(height: 6),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFFEFEDE3),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildMiniPlayerWidget() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -1483,11 +897,18 @@ class _HomeScreenState extends State<HomeScreen> {
           });
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => PlayerScreen(
-                songTitle: _currentTrack,
-                artist: _currentArtist,
-                coverPath: _currentCover,
-              ),
+              builder: (context) {
+                final track = _findTrack(_currentTrack, _currentArtist);
+                if (track != null) {
+                  return PlayerScreen(track: track);
+                } else if (_musicService.tracks.isNotEmpty) {
+                  return PlayerScreen(track: _musicService.tracks.first);
+                } else {
+                  return const Scaffold(
+                    body: Center(child: Text('Нет доступных треков')),
+                  );
+                }
+              },
             ),
           );
         },
@@ -1498,13 +919,13 @@ class _HomeScreenState extends State<HomeScreen> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                const Color(0xFF2A2A28),
+                ThemeManager.instance.secondaryBackgroundColor,
                 const Color(0xFF1F1F1E),
               ],
             ),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: const Color(0xFFEFEDE3).withValues(alpha: 0.2),
+              color: ThemeManager.instance.textColor.withValues(alpha: 0.2),
               width: 2,
             ),
             boxShadow: [
@@ -1523,12 +944,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Container(
                   width: 70,
                   height: 70,
-                  color: const Color(0xFF3D3C38),
+                  color: ThemeManager.instance.secondaryBackgroundColor,
                   child: Image.asset(
                     _currentCover,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
-                      return const Icon(
+                      return Icon(
                         Icons.music_note,
                         color: Color(0xFFEFEDE3),
                         size: 30,
@@ -1545,7 +966,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Text(
                       _currentTrack,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: Color(0xFFEFEDE3),
@@ -1558,7 +979,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       _currentArtist,
                       style: TextStyle(
                         fontSize: 13,
-                        color: const Color(0xFFEFEDE3).withValues(alpha: 0.7),
+                        color: ThemeManager.instance.textColor.withValues(alpha: 0.7),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -1570,7 +991,7 @@ class _HomeScreenState extends State<HomeScreen> {
               // Иконка воспроизведения
               Icon(
                 Icons.play_arrow,
-                color: const Color(0xFFEFEDE3),
+                color: ThemeManager.instance.textColor,
                 size: 32,
               ),
             ],
@@ -1583,24 +1004,29 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildNowPlayingBar() {
     return InkWell(
       onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => PlayerScreen(
-              songTitle: _currentTrack,
-              artist: _currentArtist,
-              coverPath: _currentCover,
+        final track = _findTrack(_currentTrack, _currentArtist);
+        if (track != null) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => PlayerScreen(track: track),
             ),
-          ),
-        );
+          );
+        } else if (_musicService.tracks.isNotEmpty) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => PlayerScreen(track: _musicService.tracks.first),
+            ),
+          );
+        }
       },
       borderRadius: BorderRadius.circular(12),
       child: Container(
         margin: const EdgeInsets.all(8),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: const Color(0xFF1C1C1C),
+          color: ThemeManager.instance.secondaryBackgroundColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFEFEDE3), width: 2),
+          border: Border.all(color: ThemeManager.instance.textColor, width: 2),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1613,12 +1039,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Container(
                     width: 50,
                     height: 50,
-                    color: const Color(0xFF3D3C38),
+                    color: ThemeManager.instance.secondaryBackgroundColor,
                     child: Image.asset(
                       _currentCover,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
-                        return const Icon(
+                        return Icon(
                           Icons.music_note,
                           color: Color(0xFFEFEDE3),
                         );
@@ -1635,7 +1061,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Text(
                         _currentTrack,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: Color(0xFFEFEDE3),
@@ -1648,7 +1074,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         _currentArtist,
                         style: TextStyle(
                           fontSize: 12,
-                          color: const Color(0xFFEFEDE3).withValues(alpha: 0.6),
+                          color: ThemeManager.instance.textColor.withValues(alpha: 0.6),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -1666,7 +1092,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                   icon: Icon(
                     _isPlaying ? Icons.pause : Icons.play_arrow,
-                    color: const Color(0xFFEFEDE3),
+                    color: ThemeManager.instance.textColor,
                   ),
                   iconSize: 32,
                   padding: EdgeInsets.zero,
@@ -1679,10 +1105,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     setState(() {
                       _currentTrack = 'Night Drive';
                       _currentArtist = 'CUPSIZE';
-                      _currentCover = 'assets/vinyl3.png';
+                      _currentCover = 'assets/b64ab0d02093bf822f74375c79e24e23.jpg';
                     });
                   },
-                  icon: const Icon(Icons.skip_next, color: Color(0xFFEFEDE3)),
+                  icon: Icon(Icons.skip_next, color: Color(0xFFEFEDE3)),
                   iconSize: 32,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
@@ -1695,276 +1121,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildWidgetsSection(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Мои виджеты',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFFEFEDE3),
-                ),
-              ),
-              TextButton.icon(
-                onPressed: () async {
-                  final result = await Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const WidgetCreatorScreen(),
-                    ),
-                  );
-                  if (result != null) {
-                    setState(() {
-                      _createdWidgets.add(result);
-                    });
-                  }
-                },
-                icon: const Icon(Icons.add, color: Color(0xFFEFEDE3), size: 20),
-                label: const Text(
-                  'Создать',
-                  style: TextStyle(
-                    color: Color(0xFFEFEDE3),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          if (_createdWidgets.isEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1C1C1C),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: const Color(0xFFEFEDE3).withValues(alpha: 0.1),
-                  width: 1,
-                ),
-              ),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.widgets,
-                    size: 48,
-                    color: const Color(0xFFEFEDE3).withValues(alpha: 0.5),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Создайте виджет для рабочего стола',
-                    style: TextStyle(
-                      color: const Color(0xFFEFEDE3).withValues(alpha: 0.6),
-                      fontSize: 14,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            )
-          else
-            SizedBox(
-              height: 200,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: [
-                  ..._createdWidgets.map(
-                    (widget) => _buildWidgetPreviewCard(widget),
-                  ),
-                  const SizedBox(width: 12),
-                  // Add new widget card
-                  GestureDetector(
-                    onTap: () async {
-                      final result = await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const WidgetCreatorScreen(),
-                        ),
-                      );
-                      if (result != null) {
-                        setState(() {
-                          _createdWidgets.add(result);
-                        });
-                      }
-                    },
-                    child: Container(
-                      width: 160,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1C1C1C),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: const Color(0xFFEFEDE3).withValues(alpha: 0.2),
-                          width: 2,
-                          style: BorderStyle.solid,
-                        ),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.add,
-                            size: 48,
-                            color: const Color(
-                              0xFFEFEDE3,
-                            ).withValues(alpha: 0.5),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Создать виджет',
-                            style: TextStyle(
-                              color: const Color(
-                                0xFFEFEDE3,
-                              ).withValues(alpha: 0.6),
-                              fontSize: 12,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildWidgetPreviewCard(Map<String, dynamic> widget) {
-    final backgroundImage = widget['backgroundImage'] as String?;
-    final isBackgroundFromGallery = widget['isBackgroundFromGallery'] as bool? ?? false;
-    final contentName = widget['contentName'] as String? ?? 'Виджет';
-    final contentType = widget['contentType'] as String? ?? 'playlist';
-    
-    return Container(
-      width: 160,
-      margin: const EdgeInsets.only(right: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1C1C1C),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFFEFEDE3).withValues(alpha: 0.2),
-          width: 2,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Widget preview image
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(14),
-                ),
-              ),
-              child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(14),
-                ),
-                child: backgroundImage != null
-                    ? (isBackgroundFromGallery
-                        ? Image.file(
-                            File(backgroundImage),
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                color: const Color(0xFF2A2A28),
-                                child: const Icon(
-                                  Icons.image,
-                                  color: Color(0xFFEFEDE3),
-                                  size: 40,
-                                ),
-                              );
-                            },
-                          )
-                        : Image.asset(
-                            backgroundImage,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                color: const Color(0xFF2A2A28),
-                                child: const Icon(
-                                  Icons.image,
-                                  color: Color(0xFFEFEDE3),
-                                  size: 40,
-                                ),
-                              );
-                            },
-                          ))
-                    : Container(
-                        color: const Color(0xFF2A2A28),
-                        child: const Icon(
-                          Icons.image,
-                          color: Color(0xFFEFEDE3),
-                          size: 40,
-                        ),
-                      ),
-              ),
-            ),
-          ),
-          // Widget info
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  contentName,
-                  style: const TextStyle(
-                    color: Color(0xFFEFEDE3),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  _getContentTypeLabel(contentType),
-                  style: TextStyle(
-                    color: const Color(0xFFEFEDE3).withValues(alpha: 0.6),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _getContentTypeLabel(String type) {
-    switch (type) {
-      case 'song':
-        return 'Песня';
-      case 'playlist':
-        return 'Плейлист';
-      case 'album':
-        return 'Альбом';
-      case 'artist':
-        return 'Исполнитель';
-      default:
-        return '';
-    }
-  }
-
   Widget _buildBottomNavBar() {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF171716),
+        color: ThemeManager.instance.backgroundColor,
         border: Border(
           top: BorderSide(
-            color: const Color(0xFFEFEDE3).withValues(alpha: 0.1),
+            color: ThemeManager.instance.textColor.withValues(alpha: 0.1),
             width: 1,
           ),
         ),
@@ -1996,8 +1159,8 @@ class _HomeScreenState extends State<HomeScreen> {
           Icon(
             icon,
             color: isSelected
-                ? const Color(0xFFEFEDE3)
-                : const Color(0xFF7A7975),
+                ? ThemeManager.instance.textColor
+                : ThemeManager.instance.secondaryTextColor,
             size: 26,
           ),
           const SizedBox(height: 4),
@@ -2006,8 +1169,8 @@ class _HomeScreenState extends State<HomeScreen> {
             style: TextStyle(
               fontSize: 11,
               color: isSelected
-                  ? const Color(0xFFEFEDE3)
-                  : const Color(0xFF7A7975),
+                  ? ThemeManager.instance.textColor
+                  : ThemeManager.instance.secondaryTextColor,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
             ),
           ),

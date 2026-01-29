@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'customization_screen.dart';
 import 'profile_settings_screen.dart';
-import 'widgets_management_screen.dart';
 import 'theme_manager.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -64,18 +63,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => const CustomizationScreen(),
-                    ),
-                  );
-                },
-              ),
-              _buildSettingsTile(
-                icon: Icons.widgets_outlined,
-                title: 'Виджеты',
-                subtitle: 'Управление виджетами для главного экрана',
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const WidgetsManagementScreen(),
                     ),
                   );
                 },
@@ -229,7 +216,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   // TODO: Очистить кеш
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: const Text('Кеш очищен'),
+                      content: Text('Кеш очищен'),
                       backgroundColor: _themeManager.secondaryBackgroundColor,
                     ),
                   );
@@ -270,54 +257,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 subtitle: 'Получить помощь',
                 onTap: () {
                   // TODO: Открыть помощь
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          // Выход
-          _buildSettingsSection(
-            title: '',
-            children: [
-              _buildSettingsTile(
-                icon: Icons.logout_outlined,
-                title: 'Выйти из аккаунта',
-                subtitle: null,
-                onTap: () {
-                  // TODO: Выход из аккаунта
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      backgroundColor: _themeManager.secondaryBackgroundColor,
-                      title: Text(
-                        'Выйти из аккаунта?',
-                        style: TextStyle(color: _themeManager.textColor),
-                      ),
-                      content: Text(
-                        'Вы уверены, что хотите выйти?',
-                        style: TextStyle(color: _themeManager.secondaryTextColor),
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: Text(
-                            'Отмена',
-                            style: TextStyle(color: _themeManager.secondaryTextColor),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            // TODO: Реализовать выход
-                          },
-                          child: Text(
-                            'Выйти',
-                            style: TextStyle(color: Colors.red),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
                 },
               ),
             ],

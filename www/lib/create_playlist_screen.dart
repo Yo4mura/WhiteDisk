@@ -24,10 +24,10 @@ class _CreatePlaylistScreenState extends State<CreatePlaylistScreen> {
   bool _isBackgroundFromGallery = false;
 
   final List<String> _imageOptions = [
-    'assets/vinyl1.png',
-    'assets/vinyl2.png',
-    'assets/vinyl3.png',
-    'assets/vinyl4.png',
+    'assets/b8be167d06c4a74174af808843cb9db4.jpg',
+    'assets/cdf42b8bf42351fdf0aed76a1efa1a4d.jpg',
+    'assets/dada9e612a304c6228f597fb30f58d31.jpg',
+    'assets/e27ce83b1f94fe83ef3cc161d1d066ae.jpg',
   ];
 
   @override
